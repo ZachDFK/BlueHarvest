@@ -37,6 +37,10 @@ public class Candidate {
 		this.voteTali = voteTali;
 	}
 	
+	public String toString(){
+		return name+":"+id+":"+partyName+":"+voteTali;
+		
+	}
 	
 	
 	

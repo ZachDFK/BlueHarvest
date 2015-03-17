@@ -1,7 +1,7 @@
 package clientserver;
 import java.io.IOException;
 import java.net.*;
-public abstract class Client extends Thread {
+public abstract class Client {
 
 	private DatagramSocket clientSocket;
 	private InetAddress serverAddress;
@@ -21,7 +21,7 @@ public abstract class Client extends Thread {
 	public void sendPacket(String dataToSend){
 		sendData = new byte[1024];
 		sendData = dataToSend.getBytes();
-		sendPacket = new DatagramPacket(sendData,sendData.length,serverAddress,serverSocket.getPort());
+		sendPacket = new DatagramPacket(sendData,sendData.length,serverAddress,1111);
 		try {
 			clientSocket.send(sendPacket);
 		} catch (IOException e) {

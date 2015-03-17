@@ -1,11 +1,18 @@
 package clientserver;
 
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.Semaphore;
+
+import MVC.ManualVoter;
 
 public class DistrictServer implements Runnable {
 	
@@ -41,20 +48,58 @@ public class DistrictServer implements Runnable {
 			stationClients.add(new PollingStationClient(this,this.serverSocket));
 		}
 		
-		
-		
 		loadCanditates();
 		
+		ManualVoter manu = new ManualVoter(this);
+		Thread t = new Thread(manu);
+		t.start();
 	}
+	
 	public void loadCanditates(){
+		try {
+			FileInputStream candidateFile = new FileInputStream("./inputFiles/CandidateFile.txt");
+			
+			Scanner reader = new Scanner(candidateFile);
+			
+			int tempID;
+			do{
+				 tempID = Integer.parseInt(reader.nextLine().toString().split("-")[0]);
+			}while(!(tempID == this.id) || !(reader.hasNext()));
+			
+			boolean valid = true;
+			while(valid){
+				
+				String candidateInfo = reader.nextLine().toString();
+				
+				
+				String splitInfo[] = new String[10];
+				splitInfo = candidateInfo.split(":");
+				if(splitInfo.length <3){
+					valid = false;
+				}
+				else{
+					System.out.println(candidateInfo);
+					candidates.add(new Candidate(splitInfo[0], Integer.parseInt(splitInfo[1]), splitInfo[2]));
+				}
+			}
+			reader.close();
+			candidateFile.close();
 		
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		}
 	}
 	
 	
 	public void sendPacket(String dataToSend){
 		sendData = new byte[1024];
 		sendData = dataToSend.getBytes();
-		sendPacket = new DatagramPacket(sendData,sendData.length,headServerAddress,headServerSocket.getPort());
+		sendPacket = new DatagramPacket(sendData,sendData.length,headServerAddress,1111);
 		try {
 			serverSocket.send(sendPacket);
 		} catch (IOException e) {
@@ -111,9 +156,12 @@ public class DistrictServer implements Runnable {
 	 * 
 	 */
 	public void requestTali() throws InterruptedException{
+		String msg = "";
+		for(Candidate cand:candidates){
+			msg += cand.getPartyName() +":"+cand.getVoteTali() + "/n";
+		}
 		
-		 System.out.println("tali oh!---ID:" + id);
-		
+		this.sendPacket(msg);
 	}
 	
 	public PollingStationClient getStation(int index){
@@ -121,9 +169,10 @@ public class DistrictServer implements Runnable {
 		return stationClients.get(index);
 	}
 	public String[] getCandidates() {
-		String[] names = null;
+		String[] names = new String[candidates.size()];
 		int inc = 0;
 		for(Candidate c: candidates){
+		
 			names[inc] = c.getName();
 			inc++;
 		}
