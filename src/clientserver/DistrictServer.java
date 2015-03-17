@@ -14,7 +14,7 @@ public class DistrictServer implements Runnable {
 	private ArrayList<Candidate> candidates = new ArrayList<Candidate>();
 	
 	private static final int MAX_CLIENT = 1;
-	private ArrayList<Client> clients = new ArrayList<Client>();
+	private ArrayList<PollingStationClient> stationClients = new ArrayList<PollingStationClient>();
 	private final Semaphore available = new Semaphore(MAX_CLIENT,true);
 	
 	private DatagramSocket serverSocket;
@@ -38,7 +38,7 @@ public class DistrictServer implements Runnable {
 			e.printStackTrace();
 		}
 		for(int c =0;c<10;c++){
-			clients.add(new PollingStationClient(this.serverSocket));
+			stationClients.add(new PollingStationClient(this,this.serverSocket));
 		}
 		
 		
@@ -47,7 +47,7 @@ public class DistrictServer implements Runnable {
 		
 	}
 	public void loadCanditates(){
-		//parse text file;
+		
 	}
 	
 	
@@ -116,5 +116,19 @@ public class DistrictServer implements Runnable {
 		
 	}
 	
+	public PollingStationClient getStation(int index){
+		
+		return stationClients.get(index);
+	}
+	public String[] getCandidates() {
+		String[] names = null;
+		int inc = 0;
+		for(Candidate c: candidates){
+			names[inc] = c.getName();
+			inc++;
+		}
+		
+		return names;
+	}
 	
 }
