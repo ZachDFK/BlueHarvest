@@ -9,7 +9,7 @@ public class ManualVoter implements Runnable {
 	public ManualVoter(DistrictServer district){
 		this.district = district;
 		this.scan = new Scanner(System.in);
-		System.out.println("Weclome to manual mode.");
+		System.out.println("Weclome to manual mode.\n");
 		
 	}
 	
@@ -30,7 +30,7 @@ public class ManualVoter implements Runnable {
 		}
 		int canNum = scan.nextInt();
 		String canN = polled.printCandidates()[canNum -1];
-		System.out.println("Voted for" + canN);
+		System.out.println("Voted for" + " " + canN);
 		polled.voteFor(canN);
 		
 	}

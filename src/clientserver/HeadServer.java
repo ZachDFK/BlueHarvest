@@ -14,16 +14,11 @@ public class HeadServer {
 	
 	
 	private ArrayList<DistrictServer> districts = new ArrayList<DistrictServer>();
-	
 	private DatagramSocket thisServer;
-
-	private Semaphore available;
-
+	private Semaphore available = new Semaphore(1);
 	private DatagramPacket receivePacket;
-
-
-	private byte[] receiveData;
-	
+	private byte[] receiveData = new byte[1024];
+	private ArrayList<Thread> deepThreads = new ArrayList<Thread>();
 	public HeadServer() {
 		
 		
@@ -41,6 +36,7 @@ public class HeadServer {
 		Thread titing;
 		for(DistrictServer d:districts){
 			titing = new Thread(d);
+			deepThreads.add(titing);
 			titing.start();
 		}
 		
@@ -48,25 +44,33 @@ public class HeadServer {
 	}
 	
 	public  void requestTali(){
+		
 		Thread titing;
-		for(DistrictServer d:districts){
-			titing = new Thread(d);
-			titing.interrupt();
+		
+		for(Thread t:deepThreads){
+			
+		
+			//t.interrupt();
 			try {
-				d.requestTali();
+				
+				districts.get(deepThreads.indexOf(t)).requestTali();
+				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			titing.start();
+
+			//t.run();
+			receivePacketing();
 		}
 		
 	}
 	public void receivePacketing(){
-		
+  for(int i =0; i<districts.size(); i++){
+	  
 		try {
 			available.acquire();
 		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
+		//	 TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		receivePacket = new DatagramPacket(receiveData, receiveData.length);
@@ -81,6 +85,8 @@ public class HeadServer {
 		
 		available.release();
 	}
+	}
+	
 	
 	
 }

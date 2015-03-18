@@ -20,7 +20,7 @@ public class DistrictServer implements Runnable {
 	private int id;
 	private ArrayList<Candidate> candidates = new ArrayList<Candidate>();
 	
-	private static final int MAX_CLIENT = 1;
+	private static final int MAX_CLIENT = 2;
 	private ArrayList<PollingStationClient> stationClients = new ArrayList<PollingStationClient>();
 	private final Semaphore available = new Semaphore(MAX_CLIENT,true);
 	
@@ -107,7 +107,7 @@ public class DistrictServer implements Runnable {
 		}
 	}
 	private void instiateSockets() throws Exception {
-		serverSocket = new DatagramSocket();
+		serverSocket = new DatagramSocket(1112);
 		headServerAddress = InetAddress.getByName("localhost");
 		
 	}
@@ -116,30 +116,35 @@ public class DistrictServer implements Runnable {
 		boolean on = true;
 		receiveData = new byte[1024];
 		while(on){
+		
 			receivePacketing();
 		}
 	}
 	public void receivePacketing(){
 		
+		
 		try {
 			available.acquire();
 		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		receivePacket = new DatagramPacket(receiveData, receiveData.length);
+		
 		try {
 			serverSocket.receive(receivePacket);
+	
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		String stringP = new String(receivePacket.getData(),0,receivePacket.getLength());
+		
+		
 		taliAddition(stringP);
 		
-		available.release();
-	}
+	available.release();
 	
+	}
 	public void taliAddition(String passedS){
 		
 		for(Candidate c:candidates){
@@ -158,9 +163,9 @@ public class DistrictServer implements Runnable {
 	public void requestTali() throws InterruptedException{
 		String msg = "";
 		for(Candidate cand:candidates){
-			msg += cand.getPartyName() +":"+cand.getVoteTali() + "/n";
+			msg += cand.getPartyName() +":"+cand.getVoteTali() + "\n";
 		}
-		
+		System.out.println(msg);
 		this.sendPacket(msg);
 	}
 	

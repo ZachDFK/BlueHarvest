@@ -21,7 +21,7 @@ public class PollingStationClient extends Client{
 
 	public void voteFor(String candidate)
 	{
-		System.out.println("Vonfirm " + candidate );
+		System.out.println("Confirm sending vote for " + candidate );
 		this.sendPacket(candidate);
 	}
 

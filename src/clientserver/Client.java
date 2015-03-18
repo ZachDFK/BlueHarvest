@@ -21,7 +21,7 @@ public abstract class Client {
 	public void sendPacket(String dataToSend){
 		sendData = new byte[1024];
 		sendData = dataToSend.getBytes();
-		sendPacket = new DatagramPacket(sendData,sendData.length,serverAddress,1111);
+		sendPacket = new DatagramPacket(sendData,sendData.length,serverAddress,1112);
 		try {
 			clientSocket.send(sendPacket);
 		} catch (IOException e) {
