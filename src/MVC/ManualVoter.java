@@ -1,4 +1,5 @@
 package MVC;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 import clientserver.*;
@@ -6,20 +7,32 @@ public class ManualVoter implements Runnable {
 	
 	private DistrictServer district;
 	private Scanner scan;
+	private boolean on;
 	public ManualVoter(DistrictServer district){
 		this.district = district;
 		this.scan = new Scanner(System.in);
 		System.out.println("Weclome to manual mode.\n");
-		
+		on = true;
 	}
 	
 	
 	public void consoleRun(){
 		int pollingNumber;
-		System.out.println("Enter the polling station you belong to:");
+		System.out.println("Enter the polling station you belong to( Q to quit and close district):");
 		
-		pollingNumber = scan.nextInt();
-		voteInPoll(district.getStation(pollingNumber-1));
+		if(scan.hasNextInt() != true){
+			try {
+				district.end();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			on = false;
+		}
+		else{
+			pollingNumber = scan.nextInt();
+			voteInPoll(district.getStation(pollingNumber-1));
+		}		
 	}
 	
 	public void voteInPoll(PollingStationClient polled){
@@ -38,7 +51,7 @@ public class ManualVoter implements Runnable {
 
 	@Override
 	public void run() {
-		while(true){
+		while(on){
 			this.consoleRun();
 		}
 		

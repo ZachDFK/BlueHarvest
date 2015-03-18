@@ -19,8 +19,10 @@ public class HeadServer {
 	private DatagramPacket receivePacket;
 	private byte[] receiveData = new byte[1024];
 	private ArrayList<Thread> deepThreads = new ArrayList<Thread>();
-	public HeadServer() {
-		
+	private int mode;
+	
+	public HeadServer(int mode) {
+		this.mode = mode;
 		
 		try {
 			thisServer = new DatagramSocket(1111);
@@ -29,7 +31,7 @@ public class HeadServer {
 		}
 		
 		for(int c = 0;c<1;c++){
-			districts.add(new DistrictServer(thisServer,c+1));
+			districts.add(new DistrictServer(thisServer,c+1, mode));
 			
 		}
 		
@@ -81,10 +83,19 @@ public class HeadServer {
 		}
 		
 		String stringP = new String(receivePacket.getData(),0,receivePacket.getLength());
-		System.out.println(stringP);
+		
+		System.out.println("\nCurrent tali:" + "\n" +stringP);
 		
 		available.release();
 	}
+	}
+
+	public int getMode() {
+		return mode;
+	}
+
+	public void setMode(int mode) {
+		this.mode = mode;
 	}
 	
 	

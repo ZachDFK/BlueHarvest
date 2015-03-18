@@ -5,12 +5,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
+
+import testing.AutoVoteRun;
 
 import MVC.ManualVoter;
 
@@ -36,7 +39,7 @@ public class DistrictServer implements Runnable {
 	private String receivedTaliString;
 	
 	
-	public  DistrictServer(DatagramSocket server,int id){
+	public  DistrictServer(DatagramSocket server,int id, int mode){
 		this.id = id;
 		this.headServerSocket = server;
 		try {
@@ -49,10 +52,16 @@ public class DistrictServer implements Runnable {
 		}
 		
 		loadCanditates();
-		
+		if(mode ==1){
 		ManualVoter manu = new ManualVoter(this);
 		Thread t = new Thread(manu);
 		t.start();
+	}
+		else{
+			AutoVoteRun auto = new AutoVoteRun(this);
+			Thread t = new Thread(auto);
+			t.start();
+		}
 	}
 	
 	public void loadCanditates(){
@@ -154,6 +163,20 @@ public class DistrictServer implements Runnable {
 		}
 	}
 	
+	public void end() throws FileNotFoundException{
+		String msg = "";
+		PrintWriter out = new PrintWriter("./outputFiles/results.txt");
+		for(Candidate cand:candidates){
+			msg += cand.getPartyName() +":"+cand.getVoteTali() + "- \n";
+		}
+		
+	
+			
+			out.print(msg);
+			out.close();
+	
+		
+	}
 	
 	/**
 	 * get the tali of all clients listening
@@ -165,7 +188,7 @@ public class DistrictServer implements Runnable {
 		for(Candidate cand:candidates){
 			msg += cand.getPartyName() +":"+cand.getVoteTali() + "\n";
 		}
-		System.out.println(msg);
+		
 		this.sendPacket(msg);
 	}
 	

@@ -37,6 +37,20 @@ public class AutoVoteRun implements Runnable{
 			voteInPoll(district.getStation(pollingNumber-1));
 		
 		}
+		try {
+			district.end();
+		} catch (FileNotFoundException e1) {
+		
+			e1.printStackTrace();
+		}
+		reader.close();
+		try {
+			voters.close();
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+	
 	}
 	public void voteInPoll(PollingStationClient polled){
 		int canNum = reader.nextInt();
