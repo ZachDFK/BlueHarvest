@@ -1,0 +1,8 @@
+1-District
+Matthew Crooke:1:Conservative
+Alok Swanty:2:Liberal
+Zacharie Gauthier:3:NDP
+2-District
+John Jackson:1:Green
+Jack Johnson:2:Blue
+Jannet Bloomfield:3:Red
