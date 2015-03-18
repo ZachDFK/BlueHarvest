@@ -24,7 +24,7 @@ public class DistrictServer implements Runnable {
 	private ArrayList<Candidate> candidates = new ArrayList<Candidate>();
 	
 	private static final int MAX_CLIENT = 2;
-	private ArrayList<PollingStationClient> stationClients = new ArrayList<PollingStationClient>();
+	private ArrayList<Client> stationClients = new ArrayList<Client>();
 	private final Semaphore available = new Semaphore(MAX_CLIENT,true);
 	
 	private DatagramSocket serverSocket;
@@ -194,7 +194,7 @@ public class DistrictServer implements Runnable {
 	
 	public PollingStationClient getStation(int index){
 		
-		return stationClients.get(index);
+		return (PollingStationClient) stationClients.get(index);
 	}
 	public String[] getCandidates() {
 		String[] names = new String[candidates.size()];
