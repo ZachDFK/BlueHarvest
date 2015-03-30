@@ -20,7 +20,7 @@ import com.harvest.model.voter.AutoVoteRun;
 import com.harvest.model.voter.ManualVoter;
 
 public class DistrictServer implements Runnable {
-
+	// commit test
 	private int id;
 	private ArrayList<Candidate> candidates = new ArrayList<Candidate>();
 
