@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class newHeadServer {
@@ -19,15 +20,21 @@ public class newHeadServer {
 
 	public newHeadServer(String code) {
 		receiveData = new byte[1024];
-		code = this.superSecretMatchedCode;
+		this.superSecretMatchedCode = code;
 		clientList = new ArrayList<InetAddress>();
 		try {
 			headServer = new DatagramSocket(SOCKETNUMBER);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
-
+		try {
+			System.out.println(InetAddress.getLocalHost());
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
+	
 
 	public String receivePacketing() {
 
@@ -45,7 +52,7 @@ public class newHeadServer {
 					receivePacket.getData(), 0, receivePacket.getLength()));
 
 			(new Thread(p)).start();
-
+			
 		}
 	}
 
@@ -69,8 +76,9 @@ public class newHeadServer {
 			// or is just trash
 			if (this.senderData.equals(superSecretMatchedCode)) {
 				addClient(senderAddr);
+				System.out.println(clientList.get(clientList.size()-1) + " is added to the clients");
 			} else {
-
+				System.out.println("Messsage recived: "+ senderData);
 			}
 		}
 	}
