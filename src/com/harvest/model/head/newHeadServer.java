@@ -8,9 +8,12 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import com.harvest.sharedlibrary.SharedConstants;
+
 public class newHeadServer {
 	private final static int SOCKETNUMBER = 1111;
 	private DatagramSocket headServer;
+	private DatagramSocket headServerTalker;
 	private DatagramPacket receivePacket;
 	private DatagramPacket sendPacket;
 	private byte[] receiveData;
@@ -23,16 +26,24 @@ public class newHeadServer {
 		this.superSecretMatchedCode = code;
 		clientList = new ArrayList<InetAddress>();
 		try {
-			headServer = new DatagramSocket(SOCKETNUMBER);
+			headServer = new DatagramSocket(SharedConstants.HEADSOCKETNUMBERLISTENER);
 		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		try{
+			headServerTalker = new DatagramSocket(SharedConstants.HEADSOCKETNUMBERTALKER);
+		} catch(SocketException e){
 			e.printStackTrace();
 		}
 		try {
 			System.out.println(InetAddress.getLocalHost());
+
+			Timer pollTimer = new Timer(InetAddress.getLocalHost());
+			(new Thread(pollTimer)).start();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	}
 	
 
@@ -77,10 +88,14 @@ public class newHeadServer {
 			if (this.senderData.equals(superSecretMatchedCode)) {
 				addClient(senderAddr);
 				System.out.println(clientList.get(clientList.size()-1) + " is added to the clients");
-			} else {
+			} else if(this.senderData.equals(SharedConstants.POLLINGREQ)) {
+			requestPoll();
+			}else {
 				System.out.println("Messsage recived: "+ senderData);
 			}
 		}
+
+		
 	}
 
 	public void runHeadServer() {
@@ -96,13 +111,22 @@ public class newHeadServer {
 		}
 	}
 
-	public void sendPacket(String dataToSend) {
+	public void requestPoll() {
+		int c= 1;
+		for(InetAddress client:clientList){
+			
+			this.sendPacket(SharedConstants.POLLINGREQ,client,c++);
+			
+		}
+	}
+
+
+	public void sendPacket(String dataToSend,InetAddress address,int id) {
 		sendData = new byte[1024];
 		sendData = dataToSend.getBytes();
-		// sendPacket = new DatagramPacket(sendData, sendData.length,
-		// serverAddress, 1112);
+		 sendPacket = new DatagramPacket(sendData, sendData.length,address, SharedConstants.BASESOCKETNUMBER+id);
 		try {
-			headServer.send(sendPacket);
+			headServerTalker.send(sendPacket);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -14,13 +14,14 @@ public class DistrictServerLauncher {
 		System.out.println("Enter head server adress given");
 		listener = scanner.nextLine();
 		newDistrictServer dServer;
-		for(int id = 1; id<=10;id++){
+		int id = 1;
+//		for(int id = 1; id<=10;id++){
 			dServer = new newDistrictServer(SharedConstants.SUPERSECRET,id,listener);
-		
+			
 			dServer.connectToHead();
 			
 		
-		}
+//		}
 		scanner.close();
 	}
 }

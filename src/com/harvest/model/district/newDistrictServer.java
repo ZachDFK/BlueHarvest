@@ -50,7 +50,7 @@ public class newDistrictServer {
 		sendData = new byte[1024];
 		sendData = superSecretMatchedCode.getBytes();
 		sendPacket = new DatagramPacket(sendData, sendData.length,
-				headAddress, SharedConstants.HEADSOCKETNUMBER);
+				headAddress, SharedConstants.HEADSOCKETNUMBERLISTENER);
 		try {
 			districtServer.send(sendPacket);
 		} catch (IOException e) {
@@ -64,12 +64,8 @@ public class newDistrictServer {
 	public void sendData(String message){
 		sendData = new byte[1024];
 		sendData = message.getBytes();
-		try {
-			sendPacket = new DatagramPacket(sendData, sendData.length,
-					InetAddress.getLocalHost(), SharedConstants.HEADSOCKETNUMBER);
-		} catch (UnknownHostException e1) {
-			e1.printStackTrace();
-		}
+		sendPacket = new DatagramPacket(sendData, sendData.length,
+				headAddress, SharedConstants.HEADSOCKETNUMBERLISTENER);
 		try {
 			districtServer.send(sendPacket);
 		} catch (IOException e) {
@@ -81,13 +77,12 @@ public class newDistrictServer {
 		while (true) {
 			receivePacket = new DatagramPacket(receiveData, receiveData.length);
 			try {
-				headServer.receive(receivePacket);
+				districtServer.receive(receivePacket);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
 			InetAddress fromWho = receivePacket.getAddress();
-
 			ServePacket p = new ServePacket(fromWho, new String(
 					receivePacket.getData(), 0, receivePacket.getLength()));
 
@@ -108,10 +103,7 @@ public class newDistrictServer {
 
 		@Override
 		public void run() {
-			// Test if the data is to register new district, send district data,
-			// or is just trash
-			
-				System.out.println("Messsage recived: "+ senderData);
+				System.out.println("Poll request!");
 			
 		}
 	}
