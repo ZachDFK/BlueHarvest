@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 import com.harvest.sharedlibrary.SharedConstants;
 
 public class newDistrictServer {
@@ -24,14 +25,17 @@ public class newDistrictServer {
 	private String superSecretMatchedCode;
 	private InetAddress headAddress;
 
-	private Scanner scaning = new Scanner(System.in);
-	public newDistrictServer(String code,int id,String listener){
-		
+	public newDistrictServer(String code,int id){
+		Scanner scan = new Scanner(System.in);
+
+		System.out.print("Enter head server adress given:");
+		String listener = scan.nextLine();		
 		try {
 			this.headAddress = InetAddress.getByName(listener);
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		}
+		scan.close();
 		
 		this.id = id;
 		receiveData = new byte[1024];

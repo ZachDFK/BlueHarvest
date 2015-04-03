@@ -89,7 +89,7 @@ public class newHeadServer {
 				addClient(senderAddr);
 				System.out.println(clientList.get(clientList.size()-1) + " is added to the clients");
 			} else if(this.senderData.equals(SharedConstants.POLLINGREQ)) {
-			requestPoll();
+				requestPoll();
 			}else {
 				System.out.println("Messsage recived: "+ senderData);
 			}
@@ -112,11 +112,12 @@ public class newHeadServer {
 	}
 
 	public void requestPoll() {
+		System.out.println("Number of Clients: " + clientList.size());
 		int c= 1;
 		for(InetAddress client:clientList){
 			
-			this.sendPacket(SharedConstants.POLLINGREQ,client,c++);
-			
+			this.sendPacket(SharedConstants.POLLINGREQ,client,c);
+			c++;
 		}
 	}
 

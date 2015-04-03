@@ -26,15 +26,18 @@ public class Timer implements Runnable {
 
 	@Override
 	public void run() {
+
+		System.out.println("Timer Started");
 		while(true){
-			
+
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
+			System.out.println("PULL!");
 			this.sendPollRequest();
 			
 		}
