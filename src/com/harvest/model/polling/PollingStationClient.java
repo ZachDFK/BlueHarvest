@@ -9,7 +9,7 @@
 //
 //	private DistrictServerLauncher district;
 //	
-//	public PollingStationClient(DistrictServerLauncher district,DatagramSocket server) {
+//	public PollingStationClient(DistrictServer district,DatagramSocket server) {
 //		super(server);
 //		this.district = district;
 //		

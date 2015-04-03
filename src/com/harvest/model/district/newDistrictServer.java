@@ -1,5 +1,9 @@
 package com.harvest.model.district;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -9,6 +13,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.harvest.model.candidate.Candidate;
 import com.harvest.sharedlibrary.SharedConstants;
 
 public class newDistrictServer {
@@ -16,17 +21,22 @@ public class newDistrictServer {
 	private int id;
 	private DatagramSocket headServer;
 	private DatagramSocket districtServer;
+
 	private DatagramPacket receivePacket;
+
 	private DatagramPacket sendPacket;
+
 	private byte[] receiveData;
 	private byte[] sendData;
 	private String superSecretMatchedCode;
 	private InetAddress headAddress;
 
+	private ArrayList<Candidate> candidates;
+
 	public newDistrictServer(String code, int id) {
 		Scanner scan = new Scanner(System.in);
 
-		System.out.print("Enter head server adress given:");
+		System.out.print("Enter head server adress:");
 		String listener = scan.nextLine();
 		try {
 			this.headAddress = InetAddress.getByName(listener);
@@ -110,5 +120,37 @@ public class newDistrictServer {
 			System.out.println("Poll request!");
 
 		}
+	}
+
+	public void loadCanditates(String fileName) {
+		// try {
+		// FileInputStream candidateFile = new FileInputStream(
+		// FileName);
+		//
+		// Scanner reader = new Scanner(candidateFile);
+		//
+		// while(reader.hasNext()){
+		// Candidate()
+		//
+		// }
+		System.out.println("load candidate call, start.");
+		fileName =SharedConstants.DISTRICTCANDIDATE + fileName;
+		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+
+			for (String line; (line = br.readLine()) != null;) {
+
+				String[] vars = line.split(SharedConstants.REGEX);
+				if (vars.length == 3)
+					candidates.add(new Candidate(vars[0], vars[1], vars[2]));
+			}
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("load candidate call, stoped.");
 	}
 }

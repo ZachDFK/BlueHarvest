@@ -14,8 +14,6 @@ public class DistrictServerLauncher {
 //		for(int id = 1; id<=10;id++){
 			dServer = new newDistrictServer(SharedConstants.SUPERSECRET,id);
 			
-			dServer.connectToHead();
-			dServer.receivePacketing();
 		
 //		}
 	}

@@ -5,12 +5,13 @@ public class Candidate {
 	private int id;
 	private String name;
 	private String partyName;
-	private int voteTali;
+	private int voteCount;
 
-	public Candidate(String name, int id, String partyName) {
+	public Candidate(String name, String id, String partyName) {
 		this.name = name;
-		this.id = id;
+		this.id = Integer.parseInt(id);
 		this.partyName = partyName;
+		this.voteCount = 0;
 	}
 
 	public String getName() {
@@ -25,8 +26,8 @@ public class Candidate {
 		return partyName;
 	}
 
-	public int getVoteTali() {
-		return voteTali;
+	public int getCandidateVoteCount() {
+		return voteCount;
 	}
 
 	public void setName(String name) {
@@ -41,12 +42,12 @@ public class Candidate {
 		this.partyName = partyName;
 	}
 
-	public void setVoteTali(int voteTali) {
-		this.voteTali = voteTali;
+	public void setVoteCount(int voteCount) {
+		this.voteCount = voteCount;
 	}
 
 	public String toString() {
-		return name + ":" + id + ":" + partyName + ":" + voteTali;
+		return name + ":" + id + ":" + partyName + ":" + voteCount;
 
 	}
 

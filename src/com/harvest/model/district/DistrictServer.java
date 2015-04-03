@@ -49,7 +49,7 @@
 //		}
 //		for (int c = 0; c < 10; c++) {
 //			stationClients
-//					.add(new PollingStationClient(this, this.serverSocket));
+//					.add(new PollingStationClient(this.serverSocket, candidateList, voterList));
 //		}
 //
 //		loadCanditates();
