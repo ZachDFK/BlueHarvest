@@ -12,9 +12,7 @@ import java.util.Scanner;
 import com.harvest.sharedlibrary.SharedConstants;
 
 public class newDistrictServer {
-	
-	
-	
+
 	private int id;
 	private DatagramSocket headServer;
 	private DatagramSocket districtServer;
@@ -25,57 +23,59 @@ public class newDistrictServer {
 	private String superSecretMatchedCode;
 	private InetAddress headAddress;
 
-	public newDistrictServer(String code,int id){
+	public newDistrictServer(String code, int id) {
 		Scanner scan = new Scanner(System.in);
 
 		System.out.print("Enter head server adress given:");
-		String listener = scan.nextLine();		
+		String listener = scan.nextLine();
 		try {
 			this.headAddress = InetAddress.getByName(listener);
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		}
 		scan.close();
-		
+
 		this.id = id;
 		receiveData = new byte[1024];
 		this.superSecretMatchedCode = code;
 		try {
-			districtServer = new DatagramSocket(SharedConstants.BASESOCKETNUMBER+id);
+			districtServer = new DatagramSocket(
+					SharedConstants.BASESOCKETNUMBER + id);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	public void connectToHead(){
-		
+
+	public void connectToHead() {
+
 		System.out.println("Connecting...");
-		
+
 		sendData = new byte[1024];
 		sendData = superSecretMatchedCode.getBytes();
-		sendPacket = new DatagramPacket(sendData, sendData.length,
-				headAddress, SharedConstants.HEADSOCKETNUMBERLISTENER);
+		sendPacket = new DatagramPacket(sendData, sendData.length, headAddress,
+				SharedConstants.HEADSOCKETNUMBERLISTENER);
 		try {
 			districtServer.send(sendPacket);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		System.out.println("Connected");
-		
-	
+
 	}
-	
-	public void sendData(String message){
+
+	public void sendData(String message) {
 		sendData = new byte[1024];
 		sendData = message.getBytes();
-		sendPacket = new DatagramPacket(sendData, sendData.length,
-				headAddress, SharedConstants.HEADSOCKETNUMBERLISTENER);
+		sendPacket = new DatagramPacket(sendData, sendData.length, headAddress,
+				SharedConstants.HEADSOCKETNUMBERLISTENER);
 		try {
 			districtServer.send(sendPacket);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
 	public String receivePacketing() {
 
 		while (true) {
@@ -107,8 +107,8 @@ public class newDistrictServer {
 
 		@Override
 		public void run() {
-				System.out.println("Poll request!");
-			
+			System.out.println("Poll request!");
+
 		}
 	}
 }
