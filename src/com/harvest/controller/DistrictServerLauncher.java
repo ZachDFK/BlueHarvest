@@ -3,7 +3,7 @@ package com.harvest.controller;
 import java.util.Scanner;
 
 import com.harvest.model.district.newDistrictServer;
-import com.harvest.sharedlibrary.SharedConstants;
+import com.harvest.shared.SharedConstants;
 
 public class DistrictServerLauncher {
 

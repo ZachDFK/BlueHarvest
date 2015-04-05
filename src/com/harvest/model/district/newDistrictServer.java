@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import com.harvest.model.candidate.Candidate;
-import com.harvest.sharedlibrary.SharedConstants;
+import com.harvest.shared.SharedConstants;
 
 public class newDistrictServer {
 

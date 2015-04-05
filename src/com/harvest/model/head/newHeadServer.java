@@ -8,7 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import com.harvest.sharedlibrary.SharedConstants;
+import com.harvest.shared.SharedConstants;
 
 public class newHeadServer {
 	private final static int SOCKETNUMBER = 1111;

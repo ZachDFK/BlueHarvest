@@ -1,7 +1,7 @@
 package com.harvest.controller;
 
 import com.harvest.model.head.newHeadServer;
-import com.harvest.sharedlibrary.SharedConstants;
+import com.harvest.shared.SharedConstants;
 
 public class HeadServerLauncher {
 

@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 import com.harvest.model.candidate.Candidate;
 import com.harvest.model.voter.Voter;
-import com.harvest.sharedlibrary.SharedConstants;
+import com.harvest.shared.SharedConstants;
 
 public class newPollingStation {
 	
