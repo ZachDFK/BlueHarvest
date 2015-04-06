@@ -25,9 +25,7 @@ public class EHeadServer {
 	ExecutorService executor;
 	
 	public EHeadServer() {
-		
-		System.out.println("Head Server starts");
-		
+
 		executor = new ThreadPoolExecutor(THREAD_COUNT, THREAD_COUNT, 0L,
 				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(
 						POOL_QUEUE_SIZE), new DaemonThreadFactory());
@@ -35,8 +33,11 @@ public class EHeadServer {
 		
 		try {
 			headSocket = new DatagramSocket(Constant.HEAD_SERVER_PORT);
+
+			System.out.println("Head Server started on " + InetAddress.getLocalHost().getHostAddress() + ":" + headSocket.getLocalPort());	
 			receivePackets();
-		} catch (SocketException e) {
+			
+		} catch (IOException e) {
 			System.out.println("Head server could not aquire port. Shutting down.");
 		}
 	}
