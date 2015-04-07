@@ -215,7 +215,7 @@ public class EDistrictServer {
 		
 		@Override
 		public void run() {
-				if(this.pollingStationData.equals(Constant.DISTRICT_SERVER_REGISTRATION_CODE)) {
+			if(this.pollingStationData.equals(Constant.DISTRICT_SERVER_REGISTRATION_CODE)) {
 				
 				try {
 					channelSocket = new DatagramSocket();
@@ -226,8 +226,16 @@ public class EDistrictServer {
 					byte[] message = Constant.SUCCESS_CONNECTION_ACK.getBytes();
 					channelSocket.send(new DatagramPacket(message, message.length, pollingStationAddress, pollingStationPort));
 					
+					// Receive candidate information request from polling station	
 					DatagramPacket packet;
 					byte[] packetBuffer;
+					
+					packetBuffer = new byte[Constant.DATAGRAM_BUFFER_SIZE];
+					packet = new DatagramPacket(packetBuffer, packetBuffer.length);
+					channelSocket.receive(packet);
+					
+					
+					
 
 					while(true) {
 						packetBuffer = new byte[Constant.DATAGRAM_BUFFER_SIZE];
