@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -37,6 +38,8 @@ public class EDistrictServer {
 	private List<Candidate> candidates;
 	private Map<Voter, Candidate> candidateVoters;
 	
+	private String candidatesString;	// String format of the candidates
+	
 	ExecutorService executor;
 	
 	public EDistrictServer() {
@@ -46,6 +49,7 @@ public class EDistrictServer {
 		
 		candidates = new ArrayList<Candidate>();
 		candidateVoters = new HashMap<Voter, Candidate>();
+		candidatesString = "";
 		
 		Scanner input = new Scanner(System.in);
 		boolean successInput = false;
@@ -123,29 +127,30 @@ public class EDistrictServer {
 		DistrictPollingStationChannel channel;
 		byte[] packetData;
 		
-		while(true) {
-			packetData = new byte[Constant.DATAGRAM_BUFFER_SIZE];
-			packet = new DatagramPacket(packetData, Constant.DATAGRAM_BUFFER_SIZE);
+		try {
+			pollingStationRegistrationSocket = new DatagramSocket();
+			System.out.println("Connect to " + InetAddress.getLocalHost().getHostAddress() + ":" + pollingStationRegistrationSocket.getLocalPort() + " to register to this district.");
 
-			try {
-				pollingStationRegistrationSocket = new DatagramSocket();
-				System.out.println("Connect to " + InetAddress.getLocalHost().getHostAddress() + ":" + pollingStationRegistrationSocket.getLocalPort() + " to register to this district.");
+			while(true) {
+				packetData = new byte[Constant.DATAGRAM_BUFFER_SIZE];
+				packet = new DatagramPacket(packetData, Constant.DATAGRAM_BUFFER_SIZE);
+	
 				pollingStationRegistrationSocket.receive(packet);
 				System.out.println("District receives packet for registration");
 				channel = new DistrictPollingStationChannel(packet.getAddress(), packet.getPort(), new String(packet.getData(), 0, packet.getLength()));
-				executor.execute(channel);
-				
-			} catch (IOException e) {
-				System.out.println("Head server cannot recieve any more packets");
-				break;
+				executor.execute(channel);				
 			}
+		} catch (IOException e) {
+			System.out.println("Socket cannot be aquired to setup district registration");
 		}
+
 	}
 	
 	public boolean openCandidateFile(String fileName) {
 		try (BufferedReader br = new BufferedReader(new FileReader(Constant.DISTRICT_CANDIDATES_PATH + fileName))) {
 			for (String line; (line = br.readLine()) != null;) {
-				String[] vars = line.split(Constant.FILE_DELIMITER);
+				candidatesString += line + Constant.CANDIDATES_STRING_DELIMITER;
+				String[] vars = line.split(Constant.DATA_DELIMITER);
 				if (vars.length == 3)
 					candidates.add(new Candidate(vars[0], vars[1], vars[2]));
 			}
@@ -158,7 +163,7 @@ public class EDistrictServer {
 	public boolean openVoterFile(String fileName) {
 		try (BufferedReader br = new BufferedReader(new FileReader(Constant.DISTRICT_VOTERS_PATH + fileName))) {
 			for (String line; (line = br.readLine()) != null;) {
-				String[] vars = line.split(Constant.FILE_DELIMITER);
+				String[] vars = line.split(Constant.DATA_DELIMITER);
 				if (vars.length == 4)
 					candidateVoters.put(new Voter(vars[0], vars[1], vars[2], vars[3]), null);
 			}
@@ -166,6 +171,57 @@ public class EDistrictServer {
 		} catch (IOException e) {
 			return false;
 		}
+	}
+	
+	public Candidate getCandidateById(String id) {
+		for (Candidate c : candidates) {
+			if(c.getId().equals(id)) {
+				return c;
+			}
+		}
+		return null;
+	}
+	
+	public synchronized String handlePollingStationPacket(DatagramPacket packet) {
+		String psPacketMessage = new String(packet.getData(), 0, packet.getLength());
+		String[] psSplitPacketMessage = psPacketMessage.split(Constant.DATA_DELIMITER);
+		
+		if(psSplitPacketMessage.length == Constant.POLLING_STATION_PACKET_DATA_SIZE) {
+			if(psSplitPacketMessage[0].equals(Constant.REGISTER_VOTER_PACKET_ID)) {
+				return registerNewVoter(psSplitPacketMessage[1], psSplitPacketMessage[2], psSplitPacketMessage[3], psSplitPacketMessage[4]);
+			} else if (psSplitPacketMessage[0].equals(Constant.VOTE_CANDIDATE_PACKET_ID)) {
+				return voteForCandidate(psSplitPacketMessage[1], psSplitPacketMessage[2], psSplitPacketMessage[3], psSplitPacketMessage[4]);				
+			} else {
+				System.out.println("Invalid Packet from polling station. Packet is ignored.");
+			}
+		} else {
+			System.out.println("Invalid Packet from polling station. Packet is ignored.");
+		}
+		return null;
+	}
+	
+	public String registerNewVoter(String fName, String lName, String sin, String addr) {
+		if (candidateVoters.containsKey(new Voter(fName, lName, sin, addr))) {
+			return Constant.VOTE_REGISTRATION_FAILURE;
+		} else {
+			candidateVoters.put(new Voter(fName, lName, sin, addr), null);
+			return Constant.VOTE_REGISTRATION_SUCCESS;
+		}
+	}
+	
+	public String voteForCandidate(String fName, String lName, String sin, String candidateId) {
+		for (Map.Entry<Voter, Candidate> v : candidateVoters.entrySet()) {
+			if(v.getKey().getSin().equals(sin)) {
+				if(v.getValue() == null) {
+					v.setValue(getCandidateById(candidateId));
+					return Constant.VOTE_SUCCESS;
+				} else {
+					return Constant.VOTE_FAILURE_MULTIPLE;
+				}
+			}
+		}
+		
+		return Constant.VOTE_FAILURE_INVALID;
 	}
 	
 	public class DistrictHeadServerChannel implements Runnable {
@@ -233,17 +289,28 @@ public class EDistrictServer {
 					packetBuffer = new byte[Constant.DATAGRAM_BUFFER_SIZE];
 					packet = new DatagramPacket(packetBuffer, packetBuffer.length);
 					channelSocket.receive(packet);
-					
-					
-					
-
-					while(true) {
-						packetBuffer = new byte[Constant.DATAGRAM_BUFFER_SIZE];
-						packet = new DatagramPacket(packetBuffer, packetBuffer.length);
-						channelSocket.receive(packet);
 						
-						System.out.println(new String(packet.getData(), 0, packet.getLength()));
+					String pollingStationMessage = new String(packet.getData(), 0, packet.getLength());
+					
+					// When polling station requests for candidate information, send it
+					if(pollingStationMessage.equals(Constant.REQUEST_CANDIDATE_INFO)){
+						byte[] candidatesMessage = candidatesString.getBytes();
+						packet = new DatagramPacket(candidatesMessage, candidatesMessage.length, pollingStationAddress, pollingStationPort);
+						channelSocket.send(packet);
+						
+						while(true) {
+							packetBuffer = new byte[Constant.DATAGRAM_BUFFER_SIZE];
+							packet = new DatagramPacket(packetBuffer, packetBuffer.length);
+							channelSocket.receive(packet);
+							
+							handlePollingStationPacket(packet);
+						}
+					} else {
+						System.out.println("Polling station sending invalid requests. Closing socket(");
+						channelSocket.close();
+						return;
 					}
+					
 				} catch (IOException e) {
 					System.out.println("Could not open socket to reply to polling station");
 					channelSocket.close();

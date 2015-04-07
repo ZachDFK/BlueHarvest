@@ -2,23 +2,21 @@ package com.harvest.model.candidate;
 
 public class Candidate {
 
-	private int id;
+	private String id;
 	private String name;
 	private String partyName;
-	private int voteCount;
 
 	public Candidate(String name, String id, String partyName) {
 		this.name = name;
-		this.id = Integer.parseInt(id);
+		this.id = id;
 		this.partyName = partyName;
-		this.voteCount = 0;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
@@ -26,15 +24,11 @@ public class Candidate {
 		return partyName;
 	}
 
-	public int getCandidateVoteCount() {
-		return voteCount;
-	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -42,13 +36,18 @@ public class Candidate {
 		this.partyName = partyName;
 	}
 
-	public void setVoteCount(int voteCount) {
-		this.voteCount = voteCount;
-	}
-
 	public String toString() {
-		return name + ":" + id + ":" + partyName + ":" + voteCount;
+		return name + ":" + id + ":" + partyName;
 
 	}
-
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Candidate))
+			return false;
+		
+		if(this.id.equals(((Candidate)obj).getId()))
+			return true;
+		
+		return false;
+	}
 }

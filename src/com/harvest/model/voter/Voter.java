@@ -46,4 +46,14 @@ public class Voter {
 		this.address = address;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Voter))
+			return false;
+		
+		if(this.sin.equals(((Voter)obj).getSin()))
+			return true;
+		
+		return false;
+	}
 }

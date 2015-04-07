@@ -14,13 +14,15 @@ public class EPollingStationClient {
 	private InetAddress districtServerAddress;
 	private int districtServerPort;
 	
+	private DatagramSocket pollingStationToDistrictSocket;
+	
 	public EPollingStationClient() {
 
 		Scanner input = new Scanner(System.in);
 		boolean successInput = false;
 	
 		try {
-			DatagramSocket pollingStationToDistrictSocket = new DatagramSocket();
+			pollingStationToDistrictSocket = new DatagramSocket();
 			
 			byte[] payload = Constant.DISTRICT_SERVER_REGISTRATION_CODE.getBytes();
 
@@ -66,6 +68,8 @@ public class EPollingStationClient {
 				return;
 			}
 			
+			setupVotingSystem();
+			
 			// might not need to close
 			pollingStationToDistrictSocket.close();
 		} catch (IOException e) {
@@ -73,4 +77,23 @@ public class EPollingStationClient {
 			return;
 		}
 	}	
+	
+	public void setupVotingSystem() {
+		try {
+			byte[] message = Constant.REQUEST_CANDIDATE_INFO.getBytes();
+			DatagramPacket candidatesPacket = new DatagramPacket(message, message.length, districtServerAddress, districtServerPort);
+
+			// send request to district for candidates information
+			pollingStationToDistrictSocket.send(candidatesPacket);
+
+			candidatesPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
+			pollingStationToDistrictSocket.receive(candidatesPacket);
+			
+			System.out.println(new String(candidatesPacket.getData(), 0, candidatesPacket.getLength()));
+			
+		
+		} catch (IOException e) {
+			System.out.println("Count not setup polling station to request for candidates.");
+		}
+	}
 }
