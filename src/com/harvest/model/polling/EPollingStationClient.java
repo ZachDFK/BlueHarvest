@@ -5,6 +5,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import com.harvest.shared.Constant;
@@ -16,8 +18,12 @@ public class EPollingStationClient {
 	
 	private DatagramSocket pollingStationToDistrictSocket;
 	
+	private Map<String, String> candidateIdMap;
+	
 	public EPollingStationClient() {
 
+		candidateIdMap = new HashMap<String, String>();
+		
 		Scanner input = new Scanner(System.in);
 		boolean successInput = false;
 	
@@ -89,11 +95,37 @@ public class EPollingStationClient {
 			candidatesPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
 			pollingStationToDistrictSocket.receive(candidatesPacket);
 			
-			System.out.println(new String(candidatesPacket.getData(), 0, candidatesPacket.getLength()));
-			
+			String candidatesString = new String(candidatesPacket.getData(), 0, candidatesPacket.getLength());
+			String[] candidates = candidatesString.split(Constant.CANDIDATES_STRING_DELIMITER);
+			for(String c: candidates){
+				if (c.length() > 0) {
+					String[] candidateInfo = c.split(Constant.DATA_DELIMITER);
+					candidateIdMap.put(candidateInfo[0] + " - " + candidateInfo[2], candidateInfo[1]);
+				}
+			}
 		
+			Scanner in = new Scanner(System.in);
+			while(true) {
+				System.out.println("Here are the candidates: ");
+				for (String name : candidateIdMap.keySet())
+					System.out.println(name);
+				System.out.println("Enter your command");
+
+				String input = in.nextLine();
+				byte[] input_data = input.getBytes();
+				
+				candidatesPacket = new DatagramPacket(input_data, input_data.length, districtServerAddress, districtServerPort);
+				pollingStationToDistrictSocket.send(candidatesPacket);
+				System.out.println("Client has sent a packet to the district");
+				
+				candidatesPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
+				pollingStationToDistrictSocket.receive(candidatesPacket);
+				System.out.println("Client has recieved a packet from the district");
+				
+				System.out.println("District Reply: " + new String(candidatesPacket.getData(), 0, candidatesPacket.getLength()));
+			}
 		} catch (IOException e) {
-			System.out.println("Count not setup polling station to request for candidates.");
+			System.out.println("Polling Station Timeout error.");
 		}
 	}
 }

@@ -32,4 +32,6 @@ public class Constant {
 	
 	public static String VOTE_REGISTRATION_SUCCESS = "VOTE_REG_SUCCESS";
 	public static String VOTE_REGISTRATION_FAILURE = "VOTE_REG_FAILURE";
+	
+	public static String INVALID_PACKET = "INVALID_PACKET";
 }

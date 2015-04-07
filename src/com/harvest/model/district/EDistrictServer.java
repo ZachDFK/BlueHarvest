@@ -192,26 +192,39 @@ public class EDistrictServer {
 			} else if (psSplitPacketMessage[0].equals(Constant.VOTE_CANDIDATE_PACKET_ID)) {
 				return voteForCandidate(psSplitPacketMessage[1], psSplitPacketMessage[2], psSplitPacketMessage[3], psSplitPacketMessage[4]);				
 			} else {
-				System.out.println("Invalid Packet from polling station. Packet is ignored.");
+				System.out.println("Invalid Packet from polling station.");
 			}
 		} else {
-			System.out.println("Invalid Packet from polling station. Packet is ignored.");
+			System.out.println("Invalid Packet from polling station.");
 		}
 		return null;
 	}
 	
 	public String registerNewVoter(String fName, String lName, String sin, String addr) {
-		if (candidateVoters.containsKey(new Voter(fName, lName, sin, addr))) {
-			return Constant.VOTE_REGISTRATION_FAILURE;
-		} else {
-			candidateVoters.put(new Voter(fName, lName, sin, addr), null);
-			return Constant.VOTE_REGISTRATION_SUCCESS;
+		for (Map.Entry<Voter, Candidate> v : candidateVoters.entrySet()) {
+			Voter vot = v.getKey();
+			
+			if(vot.getSin().equals(sin)) {
+				return Constant.VOTE_REGISTRATION_FAILURE;
+			}
 		}
+		
+		candidateVoters.put(new Voter(fName, lName, sin, addr), null);
+		return Constant.VOTE_REGISTRATION_SUCCESS;
+//		
+//		
+//		if (candidateVoters.containsKey(new Voter(fName, lName, sin, addr))) {
+//			return Constant.VOTE_REGISTRATION_FAILURE;
+//		} else {
+//			candidateVoters.put(new Voter(fName, lName, sin, addr), null);
+//			return Constant.VOTE_REGISTRATION_SUCCESS;
+//		}
 	}
 	
 	public String voteForCandidate(String fName, String lName, String sin, String candidateId) {
 		for (Map.Entry<Voter, Candidate> v : candidateVoters.entrySet()) {
-			if(v.getKey().getSin().equals(sin)) {
+			Voter vot = v.getKey();
+			if(vot.getSin().equals(sin) && vot.getFirstName().equals(fName) && vot.getLastName().equals(lName)) {
 				if(v.getValue() == null) {
 					v.setValue(getCandidateById(candidateId));
 					return Constant.VOTE_SUCCESS;
@@ -297,13 +310,20 @@ public class EDistrictServer {
 						byte[] candidatesMessage = candidatesString.getBytes();
 						packet = new DatagramPacket(candidatesMessage, candidatesMessage.length, pollingStationAddress, pollingStationPort);
 						channelSocket.send(packet);
+						System.out.println("Sent candidate info back to client");
 						
 						while(true) {
 							packetBuffer = new byte[Constant.DATAGRAM_BUFFER_SIZE];
 							packet = new DatagramPacket(packetBuffer, packetBuffer.length);
 							channelSocket.receive(packet);
+							System.out.println("Received a vote packet from a polling station");
 							
-							handlePollingStationPacket(packet);
+							String pollingStationVoteReplyMessage = handlePollingStationPacket(packet);
+							byte[] pollingStationVoteReply = pollingStationVoteReplyMessage == null ? Constant.INVALID_PACKET.getBytes() : pollingStationVoteReplyMessage.getBytes();
+							
+							packet = new DatagramPacket(pollingStationVoteReply, pollingStationVoteReply.length, pollingStationAddress, pollingStationPort);
+							channelSocket.send(packet);
+							System.out.println("Sending a reply to the vote packet to the polling station");
 						}
 					} else {
 						System.out.println("Polling station sending invalid requests. Closing socket(");
