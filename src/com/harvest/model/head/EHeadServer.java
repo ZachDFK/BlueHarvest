@@ -99,7 +99,7 @@ public class EHeadServer {
 					addDistrict(districtAddress);
 					System.out.println("Registration to head server is successful");
 					
-					// Send acknowledgement to district for successful connection
+					// Send acknowledgment to district for successful connection
 					byte[] message = Constant.SUCCESS_CONNECTION_ACK.getBytes();
 					channelSocket.send(new DatagramPacket(message, message.length, districtAddress, districtPort));
 
@@ -115,10 +115,12 @@ public class EHeadServer {
 					}
 				} catch (IOException e) {
 					System.out.println("Could not open socket to reply to district");
+					channelSocket.close();
 					return;
 				}
 			} else {
 				System.out.println("Invalid registration to head server");
+				channelSocket.close();
 			}
 		}
 	}
