@@ -100,7 +100,12 @@ public class BarChart extends JPanel
 		
 	}
 	public void receivePacketing(){
-//		while(true){
+		
+
+		int blue = 1;
+		int green = 5;
+		int purple = 10;
+		while(true){
 //			byte[] recieveByte= new byte[Constant.DATAGRAM_BUFFER_SIZE];
 //			
 //			DatagramPacket updatedResults = new DatagramPacket(recieveByte, recieveByte.length);
@@ -109,8 +114,17 @@ public class BarChart extends JPanel
 //				mediaViewToHeadSocket.receive(updatedResults);
 				
 //				String resultString = new String(updatedResults.getData(),0,updatedResults.getLength());
-				
-				String resultString = "blue:6%green:30%purple:8%green:60%yellow:11%fff:11%ggg:24%";
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
+				String resultString = "blue:"+ blue+ "%green:"+green +"%purple:"+purple+ "%";
+				purple++;
+				blue +=3;
+				green +=2;
 				
 				for(String c:resultString.split(Constant.CANDIDATES_STRING_DELIMITER)){
 					if(c.length() >0){
@@ -119,11 +133,11 @@ public class BarChart extends JPanel
 
 						
 						if(partiesNames.contains(params[0])){
-							System.out.println("Exists");
+//							System.out.println("Exists");
 							textFields.get(partiesNames.indexOf(params[0])).setText(params[0] + Constant.DATA_DELIMITER + " " + params[1] );
 						}
 						else{
-							System.out.println("New");
+//							System.out.println("New");
 							JTextField tempTextField = new JTextField(params[0] + Constant.DATA_DELIMITER + " " + params[1] );
 							
 							partiesNames.add(params[0]);
@@ -144,7 +158,7 @@ public class BarChart extends JPanel
 //			} catch( IOException e) {
 //				System.out.println("Could not connect to district server.");
 //			}
-//		}
+		}
 		
 	}
 	@Override
