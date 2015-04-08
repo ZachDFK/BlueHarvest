@@ -1,5 +1,7 @@
 package com.harvest.model.polling;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -9,20 +11,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.harvest.shared.Constant;
+import javax.swing.SwingUtilities;
 
-public class EPollingStationClient {
+import com.harvest.shared.Constant;
+import com.harvest.view.PollStaionClientView;
+
+public class EPollingStationClient implements ActionListener {
 	
 	private InetAddress districtServerAddress;
 	private int districtServerPort;
+	private ActionListener controller;
 	
 	private DatagramSocket pollingStationToDistrictSocket;
 	
 	private Map<String, String> candidateIdMap;
 	
+	private PollStaionClientView clientView;
+	
+	
 	public EPollingStationClient() {
 
 		candidateIdMap = new HashMap<String, String>();
+		
+		controller = this;
 		
 		Scanner input = new Scanner(System.in);
 		boolean successInput = false;
@@ -82,8 +93,21 @@ public class EPollingStationClient {
 			System.out.println("Polling station cannot aquire port. Shutting down.");
 			return;
 		}
+		
 	}	
 	
+	private void showGUI() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				
+				clientView = new PollStaionClientView(controller);
+				// UIManager.put("swing.boldmetal", Boolean.FALSE);
+				PollStaionClientView.createAndShowGUI(clientView);
+			}
+
+		});
+	}
+
 	public void setupVotingSystem() {
 		try {
 			byte[] message = Constant.REQUEST_CANDIDATE_INFO.getBytes();
@@ -97,13 +121,8 @@ public class EPollingStationClient {
 			
 			String candidatesString = new String(candidatesPacket.getData(), 0, candidatesPacket.getLength());
 			String[] candidates = candidatesString.split(Constant.CANDIDATES_STRING_DELIMITER);
-			for(String c: candidates){
-				if (c.length() > 0) {
-					String[] candidateInfo = c.split(Constant.DATA_DELIMITER);
-					candidateIdMap.put(candidateInfo[0] + " - " + candidateInfo[2], candidateInfo[1]);
-				}
-			}
-		
+			updateView(candidates);
+			
 			Scanner in = new Scanner(System.in);
 			while(true) {
 				System.out.println("Here are the candidates: ");
@@ -127,5 +146,25 @@ public class EPollingStationClient {
 		} catch (IOException e) {
 			System.out.println("Polling Station Timeout error.");
 		}
+	}
+	
+	public void updateView(String[] candidates){
+		for(String c: candidates){
+			if (c.length() > 0) {
+				String[] candidateInfo = c.split(Constant.DATA_DELIMITER);
+				candidateIdMap.put(candidateInfo[0] + " - " + candidateInfo[2], candidateInfo[1]);
+			}
+		}
+
+		//GUI INIT
+		showGUI();
+		
+		
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		System.out.println("BOOOOMOMOMOBMBOMBBOBOOBOOBOBOOOBOBO ");
 	}
 }

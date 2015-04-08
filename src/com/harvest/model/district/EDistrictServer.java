@@ -49,7 +49,23 @@ public class EDistrictServer {
 		
 		Scanner input = new Scanner(System.in);
 		boolean successInput = false;
-
+		
+		while(!successInput) {
+			System.out.println("Enter the name of the candidate file:");
+			successInput = openCandidateFile(input.nextLine());
+			if(!successInput) System.out.println("Could not open the candidate file...");
+		}
+		
+		successInput = false;
+		
+		while(!successInput) {
+			System.out.println("Enter the name of the voter file:");
+			successInput = openVoterFile(input.nextLine());
+			if(!successInput) System.out.println("Could not open the voter file...");
+		}
+		
+		successInput = false;
+		
 		try {
 			DatagramSocket districtToHeadSocket = new DatagramSocket();
 			
@@ -96,22 +112,6 @@ public class EDistrictServer {
 		} catch (IOException e) {
 			System.out.println("District cannot aquire port. Shutting down.");
 			return;
-		}
-		
-		successInput = false;
-		
-		while(!successInput) {
-			System.out.println("Enter the name of the candidate file:");
-			successInput = openCandidateFile(input.nextLine());
-			if(!successInput) System.out.println("Could not open the candidate file...");
-		}
-		
-		successInput = false;
-		
-		while(!successInput) {
-			System.out.println("Enter the name of the voter file:");
-			successInput = openVoterFile(input.nextLine());
-			if(!successInput) System.out.println("Could not open the voter file...");
 		}
 		
 		setupPollingStationRegistration();
