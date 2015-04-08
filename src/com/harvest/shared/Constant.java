@@ -6,6 +6,7 @@ public class Constant {
 
 	public static int DATAGRAM_BUFFER_SIZE = 1024;
 	public static int DATAGRAM_TIMEOUT = 5000;
+	public static int HEAD_SERVER_REQUEST_PERIOD = 10000;
 	
 	public static String HEAD_SERVER_REGISTRATION_CODE = "12345";
 	public static String DISTRICT_SERVER_REGISTRATION_CODE = "67890";
@@ -32,6 +33,8 @@ public class Constant {
 	
 	public static String VOTE_REGISTRATION_SUCCESS = "VOTE_REG_SUCCESS";
 	public static String VOTE_REGISTRATION_FAILURE = "VOTE_REG_FAILURE";
+	
+	public static String VOTE_TALLY_REQUEST = "VOTE_TALLY";
 	
 	public static String INVALID_PACKET = "INVALID_PACKET";
 }

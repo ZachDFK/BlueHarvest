@@ -1,10 +1,8 @@
 package com.harvest.model.district;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -21,11 +19,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.harvest.model.candidate.Candidate;
-import com.harvest.model.head.EHeadServer.DistrictChannel;
 import com.harvest.model.voter.Voter;
 import com.harvest.shared.Constant;
 import com.harvest.shared.DaemonThreadFactory;
-import com.harvest.shared.SharedConstants;
 
 public class EDistrictServer {
 
@@ -211,14 +207,6 @@ public class EDistrictServer {
 		
 		candidateVoters.put(new Voter(fName, lName, sin, addr), null);
 		return Constant.VOTE_REGISTRATION_SUCCESS;
-//		
-//		
-//		if (candidateVoters.containsKey(new Voter(fName, lName, sin, addr))) {
-//			return Constant.VOTE_REGISTRATION_FAILURE;
-//		} else {
-//			candidateVoters.put(new Voter(fName, lName, sin, addr), null);
-//			return Constant.VOTE_REGISTRATION_SUCCESS;
-//		}
 	}
 	
 	public String voteForCandidate(String fName, String lName, String sin, String candidateId) {
@@ -237,6 +225,42 @@ public class EDistrictServer {
 		return Constant.VOTE_FAILURE_INVALID;
 	}
 	
+	public String getVoteTally() {
+		String voteStringMessage = "";
+		
+		Map<Candidate, Integer> candidateVotes = new HashMap<Candidate, Integer>();
+
+		// Instantiate candidates with 0 votes
+		for (Candidate c : candidates)
+			candidateVotes.put(c, new Integer(0));
+		
+		// Add up all the votes for each candidate
+		for (Map.Entry<Voter, Candidate> v : candidateVoters.entrySet()) {
+			Candidate cand = v.getValue();
+			
+			if(cand != null)
+				candidateVotes.put(cand, candidateVotes.get(cand) + 1);
+		}
+		
+		// Convert map to string to be able to be transfered by datagram
+		for (Map.Entry<Candidate, Integer> c : candidateVotes.entrySet()) {
+			voteStringMessage += c.getKey().getName()
+					+ Constant.DATA_DELIMITER
+					+ c.getKey().getPartyName()
+					+ Constant.DATA_DELIMITER
+					+ c.getValue()
+					+ Constant.CANDIDATES_STRING_DELIMITER;
+		}
+		
+		return voteStringMessage;
+	}
+	
+	/**
+	 * A thread that handles all communication between the current district and the head server it connects to
+	 * 
+	 * @author alokswamy
+	 *
+	 */
 	public class DistrictHeadServerChannel implements Runnable {
 
 		private DatagramSocket districtToHeadSocket;
@@ -250,13 +274,16 @@ public class EDistrictServer {
 			try {
 				districtToHeadSocket.setSoTimeout(0);
 	
-				DatagramPacket receivedPacketFromHead;
+				DatagramPacket districtHeadPacket;
 				
 				while(true) {
-					receivedPacketFromHead = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
-					districtToHeadSocket.receive(receivedPacketFromHead);
-					
+					districtHeadPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
+					districtToHeadSocket.receive(districtHeadPacket);
 					System.out.println("Packet recieved from head server.");
+					
+					byte[] voteTallyMessage = getVoteTally().getBytes();
+					districtHeadPacket = new DatagramPacket(voteTallyMessage, voteTallyMessage.length, headServerAddress, headServerPort);
+					districtToHeadSocket.send(districtHeadPacket);
 				}
 			} catch (IOException e) {
 				System.out.println("District is breaking connection with head server.");
@@ -264,6 +291,12 @@ public class EDistrictServer {
 		}		
 	}
 	
+	/**
+	 * A thread that handles all communication between the current district and polling stations it connects to
+	 * 
+	 * @author alokswamy
+	 *
+	 */
 	public class DistrictPollingStationChannel implements Runnable {
 
 		private DatagramSocket channelSocket;

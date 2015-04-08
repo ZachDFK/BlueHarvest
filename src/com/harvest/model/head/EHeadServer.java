@@ -107,14 +107,23 @@ public class EHeadServer {
 					byte[] packetBuffer;
 
 					while(true) {
-						packetBuffer = new byte[Constant.DATAGRAM_BUFFER_SIZE];
-						packet = new DatagramPacket(packetBuffer, packetBuffer.length);
+						Thread.sleep(Constant.HEAD_SERVER_REQUEST_PERIOD);
+						
+						message = Constant.VOTE_TALLY_REQUEST.getBytes();
+						packet = new DatagramPacket(message, message.length, districtAddress, districtPort);
+						channelSocket.send(packet);
+						
+						packet = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
 						channelSocket.receive(packet);
 						
 						System.out.println(new String(packet.getData(), 0, packet.getLength()));
 					}
 				} catch (IOException e) {
 					System.out.println("Could not open socket to reply to district");
+					channelSocket.close();
+					return;
+				} catch (InterruptedException i) {
+					System.out.println("Could not send periodic requests to districts. Shutting down...");
 					channelSocket.close();
 					return;
 				}
