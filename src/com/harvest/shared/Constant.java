@@ -10,6 +10,8 @@ public class Constant {
 	
 	public static String HEAD_SERVER_REGISTRATION_CODE = "12345";
 	public static String DISTRICT_SERVER_REGISTRATION_CODE = "67890";
+	public static String HEAD_SERVER_MEDIA_REGISTRATION_CODE = "00000";
+	
 	
 	public static String DATA_DELIMITER = ":";
 	public static String CANDIDATES_STRING_DELIMITER = "%";
