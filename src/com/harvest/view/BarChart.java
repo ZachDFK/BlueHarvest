@@ -36,6 +36,8 @@ public class BarChart extends JPanel
 	private JPanel scores;
 	private ArrayList<String> partiesNames;
 	private ArrayList<JTextField> textFields;
+	private JScrollPane scrollBox;
+	private BarChart chart;
 	public void addBar(String name, int value)
 	{
 		bars.put(name, value);
@@ -98,53 +100,51 @@ public class BarChart extends JPanel
 		
 	}
 	public void receivePacketing(){
-		while(true){
-			byte[] recieveByte= new byte[Constant.DATAGRAM_BUFFER_SIZE];
-			
-			DatagramPacket updatedResults = new DatagramPacket(recieveByte, recieveByte.length);
-			try {
-				mediaViewToHeadSocket.receive(updatedResults);
+//		while(true){
+//			byte[] recieveByte= new byte[Constant.DATAGRAM_BUFFER_SIZE];
+//			
+//			DatagramPacket updatedResults = new DatagramPacket(recieveByte, recieveByte.length);
+		
+//			try {
+//				mediaViewToHeadSocket.receive(updatedResults);
 				
-				String resultString = new String(updatedResults.getData(),0,updatedResults.getLength());
+//				String resultString = new String(updatedResults.getData(),0,updatedResults.getLength());
 				
+				String resultString = "blue:6%green:30%purple:8%green:60%yellow:11%fff:11%ggg:24%";
 				
-//				for(String c:resultString.split(Constant.CANDIDATES_STRING_DELIMITER)){
-//					if(c.length() >0){
-//						String[] params = c.split(Constant.DATA_DELIMITER);
-//						this.addBar(params[0],Integer.parseInt(params[1]));
-//
-//						JTextField tempTextField = new JTextField();
-//						if(partiesNames.contains(params[0])){
-//							tempTextField = textFields.get(partiesNames.indexOf(params[0]));
-//							
-//						}
-//						else{
-//							tempTextField.setText(params[0] + Constant.DATA_DELIMITER + " " + params[1] );
-//							
-//						}
-//						
-//				
-//						
-//						int cand1Votes = 1;
-//						int cand2Votes = 3;
-//						int cand3Votes = 6;
-//						String party1 = "Liberal";
-//						String party2;
-//						JTextField cand1 = new JTextField(party1 + ":" + " " +Integer.toString(cand1Votes));
-//						JTextField cand2 = new JTextField(Integer.toString(cand2Votes));
-//						JTextField cand3 = new JTextField(Integer.toString(cand3Votes));
-//						cand1.setEditable(false);
-//						cand2.setEditable(false);
-//						cand3.setEditable(false);
-//					}
-//				}
-//				
+				for(String c:resultString.split(Constant.CANDIDATES_STRING_DELIMITER)){
+					if(c.length() >0){
+						String[] params = c.split(Constant.DATA_DELIMITER);
+						//this.addBar(params[0],Integer.parseInt(params[1]));
+
+						
+						if(partiesNames.contains(params[0])){
+							System.out.println("Exists");
+							textFields.get(partiesNames.indexOf(params[0])).setText(params[0] + Constant.DATA_DELIMITER + " " + params[1] );
+						}
+						else{
+							System.out.println("New");
+							JTextField tempTextField = new JTextField(params[0] + Constant.DATA_DELIMITER + " " + params[1] );
+							
+							partiesNames.add(params[0]);
+							tempTextField.setEditable(false);
+							tempTextField.setVisible(true);
+							textFields.add(tempTextField);
+							
+							scores.add(tempTextField);
+						}
+						
+						scrollBox.setViewportView(scores);
+						chart.addBar(params[0],Integer.parseInt(params[1]));
+					}
+				}
+				
 				System.out.println("Received packet "+ resultString);
-//				
-			} catch( IOException e) {
-				System.out.println("Could not connect to district server.");
-			}
-		}
+				
+//			} catch( IOException e) {
+//				System.out.println("Could not connect to district server.");
+//			}
+//		}
 		
 	}
 	@Override
@@ -159,19 +159,21 @@ public class BarChart extends JPanel
 		}
 		
 		// paint bars
-		
-		int width = (getWidth() / bars.size()) - 2;
-		int x = 1;
-		for (String name : bars.keySet())
-		{
-			int value = bars.get(name);
-			int height = (int) 
-                            ((getHeight()-5) * ((double)value / max));
-			g.setColor(Color.getColor(name));
-			g.fillRect(x, getHeight() - height, width, height);
-			g.setColor(Color.black);
-			g.drawRect(x, getHeight() - height, width, height);
-			x += (width + 2);
+		if(bars.size() > 0){
+			int width = (getWidth() / bars.size()) - 2;
+			int x = 1;
+			for (String name : bars.keySet())
+			{
+				
+				int value = bars.get(name);
+				int height = (int) 
+	                            ((getHeight()-5) * ((double)value / max));
+				g.setColor(Color.getColor(name));
+				g.fillRect(x, getHeight() - height, width, height);
+				g.setColor(Color.getColor(name));
+				g.drawRect(x, getHeight() - height, width, height);
+				x += (width + 2);
+			}
 		}
 	}
 
@@ -196,16 +198,16 @@ public class BarChart extends JPanel
 		scores = new JPanel(new GridLayout(0,1));
 		
 		
-		JScrollPane scrollBox = new JScrollPane(scores);
+		scrollBox = new JScrollPane(scores);
 		
 		
-		scrollBox.setViewportView(scores);
+		//scrollBox.setViewportView(scores);
 		scrollBox.setPreferredSize(new Dimension(10, 100));
 		
-		partiesNames = new ArrayList<String>();
-		
-		
+
 		scrollBox.setVisible(true);
+		partiesNames = new ArrayList<String>();
+		textFields = new ArrayList<JTextField>();
 		
 		
 		
@@ -214,18 +216,19 @@ public class BarChart extends JPanel
 		
 		
 		
-		BarChart chart = new BarChart();
+		chart = new BarChart();
 		
 //		chart.addBar(Color.red, cand1Votes);
 //		chart.addBar(Color.blue, cand2Votes);
 //		chart.addBar(Color.black, cand3Votes);
 //		chart.addBar("black",10);
 //		chart.addBar("blue",5);
-	chart.addBar("red",2);
+//	chart.addBar("red",2);
 	
-		frame.setResizable(false);
+		frame.setResizable(true);
 		frame.add(scrollBox, BorderLayout.NORTH);
 		//frame.add(parties, BorderLayout.CENTER);
+		
 		frame.getContentPane().add((chart), BorderLayout.SOUTH);
 		
 		frame.setPreferredSize(new Dimension(250,350));
@@ -236,6 +239,8 @@ public class BarChart extends JPanel
 	}
 	public static void main(String[] args)
 	{
-		new BarChart().setUp();
+		BarChart nChart = new BarChart();
+		nChart.setUp();
+		nChart.receivePacketing();
 	}
 }
