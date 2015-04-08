@@ -93,14 +93,12 @@ public class EHeadServer {
 		
 		for (Map.Entry<String, String> entry : districtData.entrySet()) {
 			String[] districtData = entry.getValue().split(Constant.CANDIDATES_STRING_DELIMITER);
-			System.out.println("# of districts");
 			for (String d : districtData) {
 				String[] districtDataContent = d.split(Constant.DATA_DELIMITER);
-				System.out.println(districtDataContent[0] + districtDataContent[1] + districtDataContent[2] + districtDataContent.length);
 				if (districtDataContent.length == 3) {
 					Integer partyVotes = partyVoteMap.get(districtDataContent[1]);
 					if (partyVotes == null)
-						partyVoteMap.put(districtDataContent[1], 0);
+						partyVoteMap.put(districtDataContent[1], Integer.parseInt(districtDataContent[2]));
 					else
 						partyVoteMap.put(districtDataContent[1], partyVotes+Integer.parseInt(districtDataContent[2]));
 				}
