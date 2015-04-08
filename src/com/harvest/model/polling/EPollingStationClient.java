@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import com.harvest.shared.Constant;
@@ -26,8 +27,8 @@ public class EPollingStationClient implements ActionListener {
 	
 	private Map<String, String> candidateIdMap;
 	
+
 	private PollStaionClientView clientView;
-	
 	
 	public EPollingStationClient() {
 
@@ -88,7 +89,7 @@ public class EPollingStationClient implements ActionListener {
 			setupVotingSystem();
 			
 			// might not need to close
-			pollingStationToDistrictSocket.close();
+			//pollingStationToDistrictSocket.close();
 		} catch (IOException e) {
 			System.out.println("Polling station cannot aquire port. Shutting down.");
 			return;
@@ -103,6 +104,7 @@ public class EPollingStationClient implements ActionListener {
 				clientView = new PollStaionClientView(controller);
 				// UIManager.put("swing.boldmetal", Boolean.FALSE);
 				PollStaionClientView.createAndShowGUI(clientView);
+				clientView.loadCandidatesToRadioButtons();
 			}
 
 		});
@@ -121,50 +123,111 @@ public class EPollingStationClient implements ActionListener {
 			
 			String candidatesString = new String(candidatesPacket.getData(), 0, candidatesPacket.getLength());
 			String[] candidates = candidatesString.split(Constant.CANDIDATES_STRING_DELIMITER);
-			updateView(candidates);
-			
-			Scanner in = new Scanner(System.in);
-			while(true) {
-				System.out.println("Here are the candidates: ");
-				for (String name : candidateIdMap.keySet())
-					System.out.println(name);
-				System.out.println("Enter your command");
-
-				String input = in.nextLine();
-				byte[] input_data = input.getBytes();
-				
-				candidatesPacket = new DatagramPacket(input_data, input_data.length, districtServerAddress, districtServerPort);
-				pollingStationToDistrictSocket.send(candidatesPacket);
-				System.out.println("Client has sent a packet to the district");
-				
-				candidatesPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
-				pollingStationToDistrictSocket.receive(candidatesPacket);
-				System.out.println("Client has recieved a packet from the district");
-				
-				System.out.println("District Reply: " + new String(candidatesPacket.getData(), 0, candidatesPacket.getLength()));
-			}
+			loadCandidatesToMap(candidates);
+			addCandidatesToView();
+//			Scanner in = new Scanner(System.in);
+//			while(true) {
+//				System.out.println("Here are the candidates: ");
+//				for (String name : candidateIdMap.keySet())
+//					System.out.println(name);
+//				System.out.println("Enter your command");
+//
+//				String input = in.nextLine();
+//				byte[] input_data = input.getBytes();
+//				
+//				candidatesPacket = new DatagramPacket(input_data, input_data.length, districtServerAddress, districtServerPort);
+//				pollingStationToDistrictSocket.send(candidatesPacket);
+//				System.out.println("Client has sent a packet to the district");
+//				
+//				candidatesPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
+//				pollingStationToDistrictSocket.receive(candidatesPacket);
+//				System.out.println("Client has recieved a packet from the district");
+//				
+//				System.out.println("District Reply: " + new String(candidatesPacket.getData(), 0, candidatesPacket.getLength()));
+//			}
 		} catch (IOException e) {
 			System.out.println("Polling Station Timeout error.");
 		}
 	}
 	
-	public void updateView(String[] candidates){
+//	public String registerPacket
+	public Map<String, String> getCandidateIdMap() {
+		return candidateIdMap;
+	}
+
+	public void setCandidateIdMap(Map<String, String> candidateIdMap) {
+		this.candidateIdMap = candidateIdMap;
+	}
+
+	
+	public void loadCandidatesToMap(String[] candidates){
 		for(String c: candidates){
 			if (c.length() > 0) {
 				String[] candidateInfo = c.split(Constant.DATA_DELIMITER);
 				candidateIdMap.put(candidateInfo[0] + " - " + candidateInfo[2], candidateInfo[1]);
 			}
 		}
+	
+	}
+	
+	public void addCandidatesToView(){
 
 		//GUI INIT
 		showGUI();
 		
-		
+	}
+	
+	public void sendPollingStationData(String data) {
+		try {
+			byte[] input_data = data.getBytes();
+			
+			DatagramPacket districtDataPacket = new DatagramPacket(input_data, input_data.length, districtServerAddress, districtServerPort);
+			pollingStationToDistrictSocket.send(districtDataPacket);
+			System.out.println("Client has sent a vote/voter registration packet to the district");
+			
+			districtDataPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
+			pollingStationToDistrictSocket.receive(districtDataPacket);
+			System.out.println("Client has recieved an acknowledgement packet from the district");
+			
+			handleDistrictAcknowledgements(new String(districtDataPacket.getData(), 0, districtDataPacket.getLength()));
+		} catch (IOException e) {
+			System.out.println("Could not send data to district");
+		}
+	}
+	
+	private void handleDistrictAcknowledgements(String ack) {
+		if(ack.equals(Constant.VOTE_FAILURE_INVALID))
+			clientView.showAlertBox("Vote failed due to invalid credentials.");
+		else if(ack.equals(Constant.VOTE_FAILURE_MULTIPLE))
+			clientView.showAlertBox("Vote failed. You cannot vote multiple times.");
+		else if(ack.equals(Constant.VOTE_SUCCESS))
+			clientView.showAlertBox("Vote success.");
+		else if(ack.equals(Constant.VOTE_REGISTRATION_FAILURE))
+			clientView.showAlertBox("Voter with same SIN has already registered");
+		else if(ack.equals(Constant.VOTE_REGISTRATION_SUCCESS))
+			clientView.showAlertBox("Voter has successfully registered");
+
+		clientView.clearInputBoxes();
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		System.out.println("BOOOOMOMOMOBMBOMBBOBOOBOOBOBOOOBOBO ");
+		System.out.println((e.getActionCommand()));
+		if(e.getActionCommand().equals("Submit")){
+			if(clientView.getInfoRegister()==null)
+			{
+				System.out.println("Invalid action performed");
+			}else{
+				sendPollingStationData(clientView.getInfoRegister());
+			}
+		} else if(e.getActionCommand().equals("Vote")){
+			if(clientView.getInfoRegister()==null)
+			{
+				System.out.println("Invalid action performed");
+			}else{
+				sendPollingStationData(clientView.getInfoVote());
+			}
+		}
 	}
 }

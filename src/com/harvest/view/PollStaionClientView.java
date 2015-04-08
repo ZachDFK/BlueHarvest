@@ -1,8 +1,8 @@
 package com.harvest.view;
 
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -25,11 +25,16 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.Enumeration;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 import javax.swing.text.MaskFormatter;
 
-public class PollStaionClientView extends JPanel implements ActionListener {
+import com.harvest.model.polling.EPollingStationClient;
+import com.harvest.shared.Constant;
+
+public class PollStaionClientView extends JPanel {
 	private static JTextField getSocial, getFirstName, getLastName, getAddress,
 			getFirstName1, getLastName1, getSocial1;
 	private static JLabel sin, fname, lname, address, sin1, fname1, lname1;
@@ -43,24 +48,26 @@ public class PollStaionClientView extends JPanel implements ActionListener {
 	private DatagramPacket packet;
 	private JPanel boxPanel = new JPanel(new GridLayout(0, 1));
 	private JScrollPane scrollBox = new JScrollPane();
+	private EPollingStationClient modelReference;
+	
+
+	private Map<String, String> candidateIdMap;
 	
 	
 	public PollStaionClientView(ActionListener control) {
 		super(new GridLayout(1, 1));
-		setUpSocket();
+
 		if (control == null){
 			System.out.print("OUT!");
-			control = this;
-			
-			
 		}
-		
+		modelReference = (EPollingStationClient)control;
 		JPanel panel = new JPanel();
 		SpringLayout layout = new SpringLayout();
 		panel.setLayout(layout);
 		buttonGroup = new ButtonGroup();
 		submit = new JButton("Submit");
 		submit.addActionListener(control);
+		
 		vote = new JButton("Vote");
 		vote.addActionListener(control);
 		getSocial = new JTextField("", 9);
@@ -134,18 +141,18 @@ public class PollStaionClientView extends JPanel implements ActionListener {
 
 		
 		
-		cand1 = new JRadioButton(candOne);
-		cand2 = new JRadioButton(candTwo);
-		cand3 = new JRadioButton(candThree);
-		
-		buttonGroup.add(cand1);
-		buttonGroup.add(cand2);
-		buttonGroup.add(cand3);
-		
-		boxPanel.add(cand1);
-		boxPanel.add(cand2);
-		boxPanel.add(cand3);
-		
+//		cand1 = new JRadioButton(candOne);
+//		cand2 = new JRadioButton(candTwo);
+//		cand3 = new JRadioButton(candThree);
+//		
+//		buttonGroup.add(cand1);
+//		buttonGroup.add(cand2);
+//		buttonGroup.add(cand3);
+//		
+//		boxPanel.add(cand1);
+//		boxPanel.add(cand2);
+//		boxPanel.add(cand3);
+//		
 		
 		
 		
@@ -170,7 +177,17 @@ public class PollStaionClientView extends JPanel implements ActionListener {
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
 	}
-
+	public void loadCandidatesToRadioButtons(){
+		this.candidateIdMap = modelReference.getCandidateIdMap();
+		for(String c:candidateIdMap.keySet()){
+			
+			JRadioButton tempRadioB = new JRadioButton(c);
+			buttonGroup.add(tempRadioB);
+			boxPanel.add(tempRadioB);
+		}
+		
+		
+	}
 	protected JComponent makeTextPanel(String text) {
 		JPanel panel = new JPanel(false);
 		JLabel filler = new JLabel(text);
@@ -205,82 +222,52 @@ public class PollStaionClientView extends JPanel implements ActionListener {
 		});
 	}
 
-	public static String getInfo() {
-		String add, fn, ln, sin, output;
-		String packetType = "1";
-		if (getSocial.getText() != null && getSocial.getText() != null
-				&& getSocial.getText() != null && getAddress.getText() != null) {
-			add = getSocial.getText();
-			fn = getSocial.getText();
-			ln = getSocial.getText();
-			sin = getAddress.getText();
+	public String getInfoRegister() {
+		String add, fn, ln, sin;
+		add = getAddress.getText();
+		fn = getFirstName.getText();
+		ln = getLastName.getText();
+		sin = getSocial.getText();
 
-			return output = (packetType + ":" + fn + ":" + ln + ":" + sin + ":" + add);
-		}
-		return null;
+		return (Constant.REGISTER_VOTER_PACKET_ID + ":" + fn + ":" + ln + ":" + sin + ":" + add);
 	}
-
-	private void setUpSocket() {
-
-		try {
-			socket = new DatagramSocket();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	private void loadCandidates() {
+	
+	public String getInfoVote(){
+		String fn,ln,sin,vote = "";
+		fn = getFirstName1.getText();
+		ln = getLastName1.getText();
+		sin = getSocial1.getText();
 		
+		for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+            AbstractButton button = buttons.nextElement();
+
+            if (button.isSelected()) {
+                vote = candidateIdMap.get(button.getText());
+            }
+        }
+
+		return (Constant.VOTE_CANDIDATE_PACKET_ID + Constant.DATA_DELIMITER 
+				+ fn + Constant.DATA_DELIMITER
+				+ ln + Constant.DATA_DELIMITER
+				+ sin + Constant.DATA_DELIMITER
+				+ vote);
 	}
-
-	private void sendPacket(String toSend) {
-		sendData = toSend.getBytes();
-		packet = new DatagramPacket(sendData, sendData.length);
-		try {
-			socket.send(packet);
-		} catch (IOException e) {
-
-			e.printStackTrace();
-		}
-
+	
+	public void showAlertBox(String alertMessage) {
+		JOptionPane.showMessageDialog(null, alertMessage,
+				"District Message", JOptionPane.INFORMATION_MESSAGE);
 	}
-
-	private String recievePacket() {
-		DatagramPacket receivePacket = new DatagramPacket(receiveData,
-				receiveData.length);
-		try {
-			socket.receive(receivePacket);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		String answer = new String(receivePacket.getData(), 0,
-				receivePacket.getLength());
-		return answer;
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent ae) {
-		if (ae.getSource() == submit) {
-			if (getInfo() == null) {
-				JOptionPane.showMessageDialog(null,
-						"Please fill in all fields", "Registration",
-						JOptionPane.ERROR_MESSAGE);
-			} else {
-				String sendMessage = getInfo();
-				sendPacket(sendMessage);
-			}
-			String confirmation = recievePacket();
-			if (confirmation.equals("123")) {
-				JOptionPane.showMessageDialog(null, "Successfully Registered",
-						"Registration", JOptionPane.INFORMATION_MESSAGE);
-			} else {
-				JOptionPane.showMessageDialog(null,
-						"Error Occured. Please register again.",
-						"Registration", JOptionPane.INFORMATION_MESSAGE);
-			}
-		} else if (ae.getSource() == vote) {
-			// send data from radio button vote
-		}
+	
+	public void clearInputBoxes() {
+		getAddress.setText("");
+		getFirstName.setText("");
+		getLastName.setText("");
+		getSocial.setText("");
+		
+		getFirstName1.setText("");
+		getLastName1.setText("");
+		getSocial1.setText("");
+		
+		buttonGroup.clearSelection();
 	}
 }
