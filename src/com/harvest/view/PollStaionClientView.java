@@ -19,33 +19,25 @@ import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
-import javax.swing.text.MaskFormatter;
 
 import com.harvest.model.polling.EPollingStationClient;
 import com.harvest.shared.Constant;
 
 public class PollStaionClientView extends JPanel {
+
+	private static final long serialVersionUID = 6858823818599347069L;
+	
 	private static JTextField getSocial, getFirstName, getLastName, getAddress,
 			getFirstName1, getLastName1, getSocial1;
 	private static JLabel sin, fname, lname, address, sin1, fname1, lname1;
 	private JButton submit, vote;
-	private JRadioButton cand1, cand2, cand3;
 	private ButtonGroup buttonGroup;
-	private String candOne, candTwo, candThree;
-	private byte[] sendData = new byte[1024];
 	byte[] receiveData = new byte[1024];
-	private DatagramSocket socket;
-	private DatagramPacket packet;
 	private JPanel boxPanel = new JPanel(new GridLayout(0, 1));
 	private JScrollPane scrollBox = new JScrollPane();
 	private EPollingStationClient modelReference;
