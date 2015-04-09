@@ -35,7 +35,7 @@ import com.harvest.shared.DaemonThreadFactory;
  * @author alok
  *
  */
-public class EDistrictServer {
+public class EDistrictServer implements Runnable {
 
 	private static final int THREAD_COUNT = 3;
 	private static final int POOL_QUEUE_SIZE = 3;
@@ -125,11 +125,9 @@ public class EDistrictServer {
 			System.out.println("District cannot aquire port. Shutting down.");
 			return;
 		}
-		
-		setupPollingStationRegistration();
 	}
 	
-	public void setupPollingStationRegistration() {
+	public void run() {
 		DatagramSocket pollingStationRegistrationSocket;
 		DatagramPacket packet;
 		DistrictPollingStationChannel channel;

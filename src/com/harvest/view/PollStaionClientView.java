@@ -28,6 +28,10 @@ import javax.swing.JOptionPane;
 import com.harvest.controller.EPollingStationClient;
 import com.harvest.shared.Constant;
 
+/**
+ * The UI for the polling station
+ *
+ */
 public class PollStaionClientView extends JPanel {
 
 	private static final long serialVersionUID = 6858823818599347069L;

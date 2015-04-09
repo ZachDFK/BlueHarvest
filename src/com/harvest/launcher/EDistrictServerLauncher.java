@@ -9,6 +9,8 @@ import com.harvest.controller.EDistrictServer;
  */
 public class EDistrictServerLauncher {
 	public static void main (String args[]) {
-		new EDistrictServer();
+		EDistrictServer d = new EDistrictServer();
+		// Run the district server synchronously to keep main thread alive
+		d.run();
 	}
 }

@@ -26,6 +26,10 @@ import javax.swing.SpringLayout;
 
 import com.harvest.shared.Constant;
 
+/**
+ * The UI for the media server
+ *
+ */
 public class BarChart extends JPanel {
 	private Map<String, Integer> bars = new LinkedHashMap<String, Integer>();
 	private DatagramSocket mediaViewToHeadSocket;
