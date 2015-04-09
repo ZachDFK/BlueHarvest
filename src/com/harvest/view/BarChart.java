@@ -223,10 +223,4 @@ public class BarChart extends JPanel {
 		frame.setVisible(true);
 
 	}
-
-	public static void main(String[] args) {
-		BarChart nChart = new BarChart();
-		nChart.setUp();
-		nChart.establichConnectionWithHeadServer();
-	}
 }

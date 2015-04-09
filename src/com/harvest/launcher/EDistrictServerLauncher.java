@@ -1,6 +1,6 @@
-package com.harvest.controller;
+package com.harvest.launcher;
 
-import com.harvest.model.district.EDistrictServer;
+import com.harvest.controller.EDistrictServer;
 
 public class EDistrictServerLauncher {
 	public static void main (String args[]) {

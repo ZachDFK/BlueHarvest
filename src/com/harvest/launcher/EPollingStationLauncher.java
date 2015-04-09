@@ -1,6 +1,6 @@
-package com.harvest.controller;
+package com.harvest.launcher;
 
-import com.harvest.model.polling.EPollingStationClient;;
+import com.harvest.controller.EPollingStationClient;
 
 public class EPollingStationLauncher {
 	public static void main (String args[]) {

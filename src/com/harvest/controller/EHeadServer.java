@@ -1,4 +1,4 @@
-package com.harvest.model.head;
+package com.harvest.controller;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

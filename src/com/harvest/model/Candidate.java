@@ -1,4 +1,4 @@
-package com.harvest.model.candidate;
+package com.harvest.model;
 
 public class Candidate {
 

@@ -25,7 +25,7 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 
-import com.harvest.model.polling.EPollingStationClient;
+import com.harvest.controller.EPollingStationClient;
 import com.harvest.shared.Constant;
 
 public class PollStaionClientView extends JPanel {
@@ -130,26 +130,6 @@ public class PollStaionClientView extends JPanel {
 		Dimension prefSize = new Dimension(5, 20);
 		Dimension maxSize = new Dimension(Short.MAX_VALUE, 20);
 		
-
-		
-		
-//		cand1 = new JRadioButton(candOne);
-//		cand2 = new JRadioButton(candTwo);
-//		cand3 = new JRadioButton(candThree);
-//		
-//		buttonGroup.add(cand1);
-//		buttonGroup.add(cand2);
-//		buttonGroup.add(cand3);
-//		
-//		boxPanel.add(cand1);
-//		boxPanel.add(cand2);
-//		boxPanel.add(cand3);
-//		
-		
-		
-		
-		
-		
 		scrollBox.setViewportView(boxPanel);
 		scrollBox.setSize(new Dimension(100, 200));
 		panel2.add(scrollBox);
@@ -203,17 +183,7 @@ public class PollStaionClientView extends JPanel {
 		frame.pack();
 		frame.setVisible(true);
 	}
-
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				// UIManager.put("swing.boldmetal", Boolean.FALSE);
-				createAndShowGUI(null);
-			}
-
-		});
-	}
-
+	
 	public String getInfoRegister() {
 		String add, fn, ln, sin;
 		add = getAddress.getText();

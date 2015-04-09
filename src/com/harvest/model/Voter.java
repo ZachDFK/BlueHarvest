@@ -1,4 +1,4 @@
-package com.harvest.model.voter;
+package com.harvest.model;
 
 public class Voter {
 	private String firstName;

@@ -1,4 +1,4 @@
-package com.harvest.model.district;
+package com.harvest.controller;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -18,8 +18,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.harvest.model.candidate.Candidate;
-import com.harvest.model.voter.Voter;
+import com.harvest.model.Candidate;
+import com.harvest.model.Voter;
 import com.harvest.shared.Constant;
 import com.harvest.shared.DaemonThreadFactory;
 
