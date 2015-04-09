@@ -83,7 +83,7 @@ public class BarChart extends JPanel {
 							.println("Connected media server to head server.");
 					successInput = true;
 				} catch (SocketTimeoutException e) {
-					System.out.println("Could not connect to district server.");
+					System.out.println("Could not connect to head server.");
 					successInput = false;
 				}
 			}
@@ -113,10 +113,13 @@ public class BarChart extends JPanel {
 
 	public void receivePacketing() {
 
-		//
-		// int blue = 1;
-		// int green = 5;
-		// int purple = 10;
+		try {
+			mediaViewToHeadSocket.setSoTimeout(0);
+		} catch(IOException s) {
+			System.out.println("Could not modify socket properties to communicate with head. Shutting down...");
+			return;
+		}
+		
 		while (true) {
 			byte[] recieveByte = new byte[Constant.DATAGRAM_BUFFER_SIZE];
 
@@ -159,6 +162,7 @@ public class BarChart extends JPanel {
 				System.out.println("Received packet " + resultString);
 
 			} catch (IOException e) {
+				e.printStackTrace();
 				System.out.println("Could not connect to district server.");
 			}
 		}

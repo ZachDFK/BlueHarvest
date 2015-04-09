@@ -1,5 +1,12 @@
 package com.harvest.model;
 
+/**
+ * Model that represents a Candidate
+ *
+ * We chose to not make the party an enum to be flexible enough to handle ANY
+ * parties (extends beyond Canadian party system)
+ *
+ */
 public class Candidate {
 
 	private String id;

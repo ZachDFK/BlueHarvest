@@ -15,7 +15,20 @@ import java.util.concurrent.TimeUnit;
 import com.harvest.shared.Constant;
 import com.harvest.shared.DaemonThreadFactory;
 
-public class EHeadServer {
+/**
+ * This should be the first thing that gets created when the program starts up,
+ * since a district, polling station, and media servers cannot exist if there is
+ * no head server.
+ * 
+ * This class should be instantiated using the EHeadServerLauncher
+ * 
+ * No inputs are necessary for this class. Once the head server is created, check
+ * the console to see which ip the head server is running on.
+ * 
+ * @author alok
+ *
+ */
+public class EHeadServer implements Runnable {
 
 	private static final int THREAD_COUNT = 5;
 	private static final int POOL_QUEUE_SIZE = 5;
@@ -40,17 +53,15 @@ public class EHeadServer {
 			headSocket = new DatagramSocket(Constant.HEAD_SERVER_PORT);
 
 			System.out.println("Head Server started on " + InetAddress.getLocalHost().getHostAddress() + ":" + headSocket.getLocalPort());	
-			receivePackets();
-			
 		} catch (IOException e) {
 			System.out.println("Head server could not aquire port. Shutting down.");
 		}
 	}
 	
-	public void receivePackets() {
+	public void run() {
 		DatagramPacket packet;
 		byte[] packetData;
-		DistrictChannel channel;
+		HeadServerCommunicationChannel channel;
 		
 		while(true) {
 			
@@ -60,7 +71,7 @@ public class EHeadServer {
 			try {
 				headSocket.receive(packet);
 				System.out.println("Head Server receives packet for registration");
-				channel = new DistrictChannel(packet.getAddress(), packet.getPort(), new String(packet.getData(), 0, packet.getLength()));
+				channel = new HeadServerCommunicationChannel(packet.getAddress(), packet.getPort(), new String(packet.getData(), 0, packet.getLength()));
 				executor.execute(channel);
 				
 			} catch (IOException e) {
@@ -132,39 +143,39 @@ public class EHeadServer {
 		}
 	}
 	
-	public class DistrictChannel implements Runnable {
+	public class HeadServerCommunicationChannel implements Runnable {
 		
 		private DatagramSocket channelSocket;
-		private InetAddress districtAddress;
-		private int districtPort;
-		private String districtData;
+		private InetAddress senderAddress;
+		private int senderPort;
+		private String senderData;
 		
-		public DistrictChannel(InetAddress addr, int port, String data) {
-			districtAddress = addr;
-			districtPort = port;
-			districtData = data;
+		public HeadServerCommunicationChannel(InetAddress addr, int port, String data) {
+			senderAddress = addr;
+			senderPort = port;
+			senderData = data;
 			try {
 				channelSocket = new DatagramSocket();
 			} catch (SocketException e) {
-				System.out.println("Channel to connect district and server could not be completed.");
+				System.out.println("Channel to connect district/media server and server could not be completed.");
 			}
 		}
 
 		@Override
 		public void run() {
 			
-			if(this.districtData.equals(Constant.HEAD_SERVER_REGISTRATION_CODE)) {
+			if(this.senderData.equals(Constant.HEAD_SERVER_REGISTRATION_CODE)) {
 				
 				try {
 					channelSocket = new DatagramSocket();
 
 					// Add district to list of districts
-					addDistrictData(districtAddress.getHostAddress(), districtPort);
+					addDistrictData(senderAddress.getHostAddress(), senderPort);
 					System.out.println("Registration to head server is successful");
 					
 					// Send acknowledgment to district for successful connection
 					byte[] message = Constant.SUCCESS_CONNECTION_ACK.getBytes();
-					channelSocket.send(new DatagramPacket(message, message.length, districtAddress, districtPort));
+					channelSocket.send(new DatagramPacket(message, message.length, senderAddress, senderPort));
 
 					DatagramPacket packet;
 
@@ -172,7 +183,7 @@ public class EHeadServer {
 						Thread.sleep(Constant.HEAD_SERVER_REQUEST_PERIOD);
 						
 						message = Constant.VOTE_TALLY_REQUEST.getBytes();
-						packet = new DatagramPacket(message, message.length, districtAddress, districtPort);
+						packet = new DatagramPacket(message, message.length, senderAddress, senderPort);
 						channelSocket.send(packet);
 						
 						packet = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
@@ -181,7 +192,7 @@ public class EHeadServer {
 						String dat = new String(packet.getData(), 0, packet.getLength());
 
 						System.out.println("Data received from district: " + dat);
-						updateDistrictData(this.districtAddress.getHostAddress(), this.districtPort, dat);
+						updateDistrictData(this.senderAddress.getHostAddress(), this.senderPort, dat);
 					}
 				} catch (IOException e) {
 					System.out.println("Could not open socket to reply to district");
@@ -192,7 +203,7 @@ public class EHeadServer {
 					channelSocket.close();
 					return;
 				}
-			} else if(this.districtData.equals(Constant.HEAD_SERVER_MEDIA_REGISTRATION_CODE)) {
+			} else if(this.senderData.equals(Constant.HEAD_SERVER_MEDIA_REGISTRATION_CODE)) {
 				try {
 					channelSocket = new DatagramSocket();
 
@@ -200,9 +211,9 @@ public class EHeadServer {
 					
 					// Send acknowledgment to media server for successful connection
 					byte[] message = Constant.SUCCESS_CONNECTION_ACK.getBytes();
-					channelSocket.send(new DatagramPacket(message, message.length, districtAddress, districtPort));
+					channelSocket.send(new DatagramPacket(message, message.length, senderAddress, senderPort));
 
-					addMediaServer(channelSocket, this.districtAddress.getHostAddress(), this.districtPort);
+					addMediaServer(channelSocket, this.senderAddress.getHostAddress(), this.senderPort);
 					
 					while(true) {
 						// hold thread alive

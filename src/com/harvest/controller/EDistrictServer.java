@@ -23,6 +23,18 @@ import com.harvest.model.Voter;
 import com.harvest.shared.Constant;
 import com.harvest.shared.DaemonThreadFactory;
 
+/**
+ * This represents the District Server. It should be instantiated using the EDistrictServerLauncher.
+ * It will request you to give the file that contains the candidates that run in the district,
+ * the voters that are eligible in the district, and the ip of the head server.
+ * 
+ * All candidate files are stored in [project]/inputFiles/district_candidates
+ * All voter files are stored in [project]/inputFiles/district_voters
+ * The IP of the head server is shown in the console once the head server is created
+ * 
+ * @author alok
+ *
+ */
 public class EDistrictServer {
 
 	private static final int THREAD_COUNT = 3;
@@ -359,7 +371,7 @@ public class EDistrictServer {
 							System.out.println("Sending a reply to the vote packet to the polling station");
 						}
 					} else {
-						System.out.println("Polling station sending invalid requests. Closing socket(");
+						System.out.println("Polling station sending invalid requests. Closing socket.");
 						channelSocket.close();
 						return;
 					}

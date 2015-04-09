@@ -17,12 +17,19 @@ import com.harvest.shared.Constant;
 
 public class ConnectionHeadTest {
 
+//	EHeadServer h;
+//	
+//	@Before
+//	public void setUp() throws Exception {
+//		h = new EHeadServer();
+//	}
+	
 	@Test
 	public void districtConnectTest() {
 
-		new EHeadServer();
+//		h.toString();
+		
 		try {
-
 			byte[] message = Constant.HEAD_SERVER_REGISTRATION_CODE.getBytes();
 			DatagramPacket packet = new DatagramPacket(message, message.length, InetAddress.getByName("127.0.0.1"), Constant.HEAD_SERVER_PORT);
 			DatagramSocket sock = new DatagramSocket();

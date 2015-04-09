@@ -16,6 +16,19 @@ import javax.swing.SwingUtilities;
 import com.harvest.shared.Constant;
 import com.harvest.view.PollStaionClientView;
 
+/**
+ * This class should be created once a head server and at least one district server exists
+ * The polling station should be instantiated using the EPollingStationLauncher
+ * 
+ * When you create a polling station, you are prompted for the IP and port of the district
+ * server. The IP and port of the district is given in the console when you create a district.
+ * 
+ * Once a polling station is created, and the inputs are provided, the GUI will launch for the
+ * end user to vote and register new voters.
+ * 
+ * @author alok
+ *
+ */
 public class EPollingStationClient implements ActionListener {
 	
 	private InetAddress districtServerAddress;
@@ -124,26 +137,7 @@ public class EPollingStationClient implements ActionListener {
 			String[] candidates = candidatesString.split(Constant.CANDIDATES_STRING_DELIMITER);
 			loadCandidatesToMap(candidates);
 			addCandidatesToView();
-//			Scanner in = new Scanner(System.in);
-//			while(true) {
-//				System.out.println("Here are the candidates: ");
-//				for (String name : candidateIdMap.keySet())
-//					System.out.println(name);
-//				System.out.println("Enter your command");
-//
-//				String input = in.nextLine();
-//				byte[] input_data = input.getBytes();
-//				
-//				candidatesPacket = new DatagramPacket(input_data, input_data.length, districtServerAddress, districtServerPort);
-//				pollingStationToDistrictSocket.send(candidatesPacket);
-//				System.out.println("Client has sent a packet to the district");
-//				
-//				candidatesPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
-//				pollingStationToDistrictSocket.receive(candidatesPacket);
-//				System.out.println("Client has recieved a packet from the district");
-//				
-//				System.out.println("District Reply: " + new String(candidatesPacket.getData(), 0, candidatesPacket.getLength()));
-//			}
+
 		} catch (IOException e) {
 			System.out.println("Polling Station Timeout error.");
 		}

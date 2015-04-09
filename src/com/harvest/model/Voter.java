@@ -1,5 +1,10 @@
 package com.harvest.model;
 
+/**
+ * Voter model
+ * SIN is used as a identifier and also as a password when voting
+ *
+ */
 public class Voter {
 	private String firstName;
 	private String lastName;
