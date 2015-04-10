@@ -25,6 +25,9 @@ public class Constant {
 	public static String DISTRICT_VOTERS_PATH = "./inputFiles/district_voters/";
 	public static String TEST_FOLDER_PATH = "./inputFiles/test_input_files/";
 	
+	public static String TEST_CANDIDATES_FILE = "TestDistrictCandidates";
+	public static String TEST_VOTERS_FILE = "TestDistrictVoters";
+	
 	// These two strings represent what the data of the datagram packet contains
 	// to represent failed or successful connection
 	public static String SUCCESS_CONNECTION_ACK = "SUCCESS";

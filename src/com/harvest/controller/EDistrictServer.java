@@ -42,6 +42,7 @@ public class EDistrictServer implements Runnable {
 	
 	private InetAddress headServerAddress;
 	private int headServerPort;
+	private int districtServerPort;
 	
 	private List<Candidate> candidates;
 	private Map<Voter, Candidate> candidateVoters;
@@ -50,7 +51,7 @@ public class EDistrictServer implements Runnable {
 	
 	ExecutorService executor;
 	
-	public EDistrictServer() {
+	public EDistrictServer(boolean useDefaultInput) {
 		executor = new ThreadPoolExecutor(THREAD_COUNT, THREAD_COUNT, 0L,
 				TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(
 						POOL_QUEUE_SIZE), new DaemonThreadFactory());
@@ -59,71 +60,76 @@ public class EDistrictServer implements Runnable {
 		candidateVoters = new HashMap<Voter, Candidate>();
 		candidatesString = "";
 		
-		Scanner input = new Scanner(System.in);
-		boolean successInput = false;
-		
-		while(!successInput) {
-			System.out.println("Enter the name of the candidate file:");
-			successInput = openCandidateFile(input.nextLine());
-			if(!successInput) System.out.println("Could not open the candidate file...");
-		}
-		
-		successInput = false;
-		
-		while(!successInput) {
-			System.out.println("Enter the name of the voter file:");
-			successInput = openVoterFile(input.nextLine());
-			if(!successInput) System.out.println("Could not open the voter file...");
-		}
-		
-		successInput = false;
-		
-		try {
-			DatagramSocket districtToHeadSocket = new DatagramSocket();
-			
-			byte[] payload = Constant.HEAD_SERVER_REGISTRATION_CODE.getBytes();
-
-			DatagramPacket registrationPacket;
-			DatagramPacket registrationAcknowledgementPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
+		if(!useDefaultInput) {
+			Scanner input = new Scanner(System.in);
+			boolean successInput = false;
 			
 			while(!successInput) {
-				System.out.println("Enter the IP of the head server");
-				
-				// Register district to head server
-				registrationPacket = new DatagramPacket(payload, payload.length,
-						InetAddress.getByName(input.nextLine()), Constant.HEAD_SERVER_PORT);
-				districtToHeadSocket.send(registrationPacket);
-	
-				// Receive acknowledgement from head server
-				registrationAcknowledgementPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
-				districtToHeadSocket.setSoTimeout(Constant.DATAGRAM_TIMEOUT);
-				
-				try {
-					districtToHeadSocket.receive(registrationAcknowledgementPacket);
-					successInput = true;
-				} catch(SocketTimeoutException e) {
-					System.out.println("Could not connect to head server.");
-					successInput = false;
-				}
+				System.out.println("Enter the name of the candidate file:");
+				successInput = openCandidateFile(input.nextLine());
+				if(!successInput) System.out.println("Could not open the candidate file...");
 			}
 			
-			headServerAddress = registrationAcknowledgementPacket.getAddress();
-			headServerPort = registrationAcknowledgementPacket.getPort();
-
-			String message = new String(registrationAcknowledgementPacket.getData(), 0, registrationAcknowledgementPacket.getLength());
-
-			if (message.equals(Constant.SUCCESS_CONNECTION_ACK)) {
-				System.out.println("District successfully connected to head server.");
-				Thread t = new Thread(new DistrictHeadServerChannel(districtToHeadSocket));
-				t.start();
-			} else {
-				System.out.println("District did not connect to head server.");
-				districtToHeadSocket.close();
+			successInput = false;
+			
+			while(!successInput) {
+				System.out.println("Enter the name of the voter file:");
+				successInput = openVoterFile(input.nextLine());
+				if(!successInput) System.out.println("Could not open the voter file...");
+			}
+			
+			successInput = false;
+			
+			try {
+				DatagramSocket districtToHeadSocket = new DatagramSocket();
+				
+				byte[] payload = Constant.HEAD_SERVER_REGISTRATION_CODE.getBytes();
+	
+				DatagramPacket registrationPacket;
+				DatagramPacket registrationAcknowledgementPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
+				
+				while(!successInput) {
+					System.out.println("Enter the IP of the head server");
+					
+					// Register district to head server
+					registrationPacket = new DatagramPacket(payload, payload.length,
+							InetAddress.getByName(input.nextLine()), Constant.HEAD_SERVER_PORT);
+					districtToHeadSocket.send(registrationPacket);
+		
+					// Receive acknowledgement from head server
+					registrationAcknowledgementPacket = new DatagramPacket(new byte[Constant.DATAGRAM_BUFFER_SIZE], Constant.DATAGRAM_BUFFER_SIZE);
+					districtToHeadSocket.setSoTimeout(Constant.DATAGRAM_TIMEOUT);
+					
+					try {
+						districtToHeadSocket.receive(registrationAcknowledgementPacket);
+						successInput = true;
+					} catch(SocketTimeoutException e) {
+						System.out.println("Could not connect to head server.");
+						successInput = false;
+					}
+				}
+				
+				headServerAddress = registrationAcknowledgementPacket.getAddress();
+				headServerPort = registrationAcknowledgementPacket.getPort();
+	
+				String message = new String(registrationAcknowledgementPacket.getData(), 0, registrationAcknowledgementPacket.getLength());
+	
+				if (message.equals(Constant.SUCCESS_CONNECTION_ACK)) {
+					System.out.println("District successfully connected to head server.");
+					Thread t = new Thread(new DistrictHeadServerChannel(districtToHeadSocket));
+					t.start();
+				} else {
+					System.out.println("District did not connect to head server.");
+					districtToHeadSocket.close();
+					return;
+				}
+			} catch (IOException e) {
+				System.out.println("District cannot aquire port. Shutting down.");
 				return;
 			}
-		} catch (IOException e) {
-			System.out.println("District cannot aquire port. Shutting down.");
-			return;
+		} else {
+			openCandidateFile(Constant.TEST_CANDIDATES_FILE);
+			openVoterFile(Constant.TEST_VOTERS_FILE);
 		}
 	}
 	
@@ -135,6 +141,8 @@ public class EDistrictServer implements Runnable {
 		
 		try {
 			pollingStationRegistrationSocket = new DatagramSocket();
+			districtServerPort = pollingStationRegistrationSocket.getLocalPort();
+			
 			System.out.println("Connect to " + InetAddress.getLocalHost().getHostAddress() + ":" + pollingStationRegistrationSocket.getLocalPort() + " to register to this district.");
 
 			while(true) {
@@ -150,6 +158,10 @@ public class EDistrictServer implements Runnable {
 			System.out.println("Socket cannot be aquired to setup district registration");
 		}
 
+	}
+	
+	public int getDistrictServerPort() {
+		return districtServerPort;
 	}
 	
 	public boolean openCandidateFile(String fileName) {
