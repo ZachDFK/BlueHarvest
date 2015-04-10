@@ -1,6 +1,6 @@
 package com.harvest.launcher;
 
-import com.harvest.test.AutomaticPollingStationClient;
+import com.harvest.controller.AutomaticPollingStationClient;
 
 /**
  * Launches an automatic voting system (with no GUI)
