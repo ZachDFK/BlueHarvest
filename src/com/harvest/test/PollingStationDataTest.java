@@ -14,6 +14,16 @@ import org.junit.Test;
 import com.harvest.controller.EDistrictServer;
 import com.harvest.shared.Constant;
 
+/**
+ * This test suite simulates basic user inputs in polling stations and how the district will respond
+ * Possible scenarios:
+ * 	-Registrating successfully
+ * 	-Registrating failure due to duplicate Id
+ *  -Voting successfully
+ *  -Voting failure due to invalid credentials
+ *  -Voting failure due to voting multiple times
+ *
+ */
 public class PollingStationDataTest {
 	private static EDistrictServer dist;
 	

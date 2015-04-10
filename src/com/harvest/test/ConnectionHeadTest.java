@@ -10,11 +10,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.harvest.controller.EDistrictServer;
 import com.harvest.controller.EHeadServer;
-import com.harvest.controller.EPollingStationClient;
 import com.harvest.shared.Constant;
 
+/**
+ * This test suit checks to see if the district, head server, and media server respond appropriately
+ * when connections between them are being established.
+ *
+ */
 public class ConnectionHeadTest {
 
 	private static EHeadServer head;
@@ -44,7 +47,7 @@ public class ConnectionHeadTest {
 			sock.receive(packet);
 			System.out.println("Received acknowledgement from head");
 			
-			assert(new String(packet.getData(), 0, packet.getLength()).equals(Constant.SUCCESS_CONNECTION_ACK));
+			assertTrue(new String(packet.getData(), 0, packet.getLength()).equals(Constant.SUCCESS_CONNECTION_ACK));
 		} catch (Exception e) {
 			System.out.println("Connection error");
 		}
@@ -67,7 +70,7 @@ public class ConnectionHeadTest {
 			sock.receive(packet);
 			System.out.println("Received acknowledgement from head");
 			
-			assert(new String(packet.getData(), 0, packet.getLength()).equals(Constant.SUCCESS_CONNECTION_ACK));
+			assertTrue(new String(packet.getData(), 0, packet.getLength()).equals(Constant.SUCCESS_CONNECTION_ACK));
 		} catch (Exception e) {
 			System.out.println("Connection error");
 		}
